@@ -13,8 +13,8 @@ As a reminder, a test-taker is said to solve a task when, upon seeing the task f
 
 The `data` directory contains two subdirectories:
 
-- `data/training`: contains the task files for training. Use these to prototype your algorithm or to train your algorithm to acquire ARC-relevant cognitive priors.
-- `data/evaluation`: contains the task files for evaluation. Use these to evaluate your final algorithm. To ensure fair evaluation results, do not leak information from the evaluation set into your algorithm (e.g. by looking at the evaluation tasks yourself during development, or by repeatedly modifying an algorithm while using its evaluation score as feedback).
+- `data/training`: contains the task files for training (400 tasks). Use these to prototype your algorithm or to train your algorithm to acquire ARC-relevant cognitive priors.
+- `data/evaluation`: contains the task files for evaluation (400 tasks). Use these to evaluate your final algorithm. To ensure fair evaluation results, do not leak information from the evaluation set into your algorithm (e.g. by looking at the evaluation tasks yourself during development, or by repeatedly modifying an algorithm while using its evaluation score as feedback).
 
 The tasks are stored in JSON format. Each task JSON file contains a dictionary with two fields:
 
