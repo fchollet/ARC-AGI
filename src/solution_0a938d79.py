@@ -9,7 +9,6 @@ import json
 import numpy as np
 
 
-
 def read_json_file(fileName):
     with open(fileName, 'r') as f:
         return json.load(f)   
@@ -29,19 +28,21 @@ def solve(df_io):
     is_vertical = will_be_vertical_line(ip.shape[0], rows)
     colours = (ip[rows[0]][cols[0]], ip[rows[1]][cols[1]])    
     if (is_vertical):
-        ip[:, cols[0]::4] = colours[0]
-        ip[:, cols[1]::4] = colours[1]
+        col_diff = abs(cols[0] - cols[1]) * 2
+        ip[:, cols[0]::col_diff] = colours[0]
+        ip[:, cols[1]::col_diff] = colours[1]
     else:
-        ip[rows[0]::4] = colours[0]
-        ip[rows[1]::4] = colours[1]
+        row_diff = abs(rows[0] - rows[1]) * 2
+        ip[rows[0]::row_diff] = colours[0]
+        ip[rows[1]::row_diff] = colours[1]
     
     return ip
 
 def main():
     df = read_json_file('C:/dev/git/ARC/data/training/0a938d79.json')
-#     for df in df['train']:
-#         print(np.array_equal(solve(df), df['output']))
-    print(np.array_equal(solve(df['train'][1]), df['train'][1]['output']))
+    for df in df['train']:
+        print(np.array_equal(solve(df), df['output']))
+#     print(np.array_equal(solve(df['train'][1]), df['train'][1]['output']))
     
     
 #     for input_output in df['train']:
