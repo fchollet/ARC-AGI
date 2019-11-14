@@ -21,6 +21,7 @@ def solve(grid_in):
     midpoint = grid_in_np.shape[0] // 2
     
     # Source : https://stackoverflow.com/questions/6252280/find-the-most-frequent-number-in-a-numpy-vector
+    #          [Accessed: 14/11/2019]
     (values,counts) = np.unique(grid_in_np, return_counts=True)
     ind = np.argmin(counts)
     minority_colour = values[ind]
