@@ -1,12 +1,19 @@
 import argparse
 import json
 import numpy as np
+import solver_utils
 
 def solve(grid_in):
-    # Convert from JSON format
-    grid_in_list = json.loads(grid_in)
+    """
+    This function contains the hand-coded solution for the data in 
+    2dc579da.json of the Abstraction and Reasoning Corpus (ARC)
+    
+    Inputs: grid_in - A python list of lists containing the unsolved grid data
+    
+    Returns: grid_out - A python list of lists containing the solved grid data
+    """
     # Convert to numpy array
-    grid_in_np = np.array(grid_in_list)
+    grid_in_np = np.array(grid_in)
     
     # ----------------------------------------------------------------------- #
     # ------------------------- Solve the problem --------------------------- #
@@ -33,44 +40,27 @@ def solve(grid_in):
     # ----------------------------------------------------------------------- #
     
     # Convert back to list of lists
-    grid_out_list = grid_out_np.tolist()
-    # Convert back to JSON format
-    output_grid = json.dumps(grid_out_list)
-    return output_grid
-
-def print_grid(grid_in):
-    for row in grid_in:
-        for elem in row:
-            print(elem, end=' ')
-        print()
-        
-def solve_wrapper(data_in):
-    # Convert to JSON
-    data_in_json = json.dumps(data_in)
+    grid_out = grid_out_np.tolist()
     
-    # Call the solve function
-    data_out_json = solve(data_in_json)    
-    
-    # Convert the result from JSON
-    data_out = json.loads(data_out_json)
-    
-    # Print the results
-    print_grid(data_out)
-    print()
+    return grid_out
 
 if __name__=='__main__':
+    # Get the file name passed from the command line
     parser = argparse.ArgumentParser()
     parser.add_argument("input_json_file")
     args = parser.parse_args()
     
+    # Read the file to a string
     with open(args.input_json_file) as f:
         text = f.read()
     
+    # Convert from JSON to Python Dictionary
     data = json.loads(text)
     
+    # Iterate through training grids and test grids
     for data_train in data['train']:
-        solve_wrapper(data_train['input'])
+        solver_utils.solve_wrapper(data_train['input'], solve)
         
     for data_test in data['test']:
-        solve_wrapper(data_test['input'])
+        solver_utils.solve_wrapper(data_test['input'], solve)
     
