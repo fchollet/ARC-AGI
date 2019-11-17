@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[65]:
+# In[74]:
 
 
 import pandas as pd
@@ -50,11 +50,12 @@ def solve(my_ip):
 
 def main():
     df = read_json_file(argv[1])
+    
     for df1 in df['train']:
-        print(solve(df1))
+        print(solve(df1['input']))
         print() 
     for df2 in df['test']:
-        print(solve(df1))
+        print(solve(df1['input']))
         print() 
     
         
