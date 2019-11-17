@@ -144,26 +144,3 @@ input, button {
 #task_demo_header {
     margin: 10px;
 }
-
-#modal_bg {
-    background-color: black;
-    width: 100%;
-    min-height: 10000px;
-    position: absolute;
-    top: 0;
-    left: 0;
-    overflow: hidden;
-}
-
-#modal {
-    margin: auto;
-    background-color: white;
-    text-align: center;
-    padding: 100px;
-    width: 500px;
-    margin-top: 100px;
-}
-
-#modal input {
-    margin-left: 70px;
-}

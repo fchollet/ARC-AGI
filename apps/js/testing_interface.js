@@ -111,6 +111,31 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
     fitCellsToContainer(jqOutputGrid, outputGrid.height, outputGrid.width, 200, 200);
 }
 
+function loadJSONTask(train, test) {
+    resetTask();
+    $('#error_display').hide();
+    $('#info_display').hide();
+
+    for (var i = 0; i < train.length; i++) {
+        pair = train[i];
+        values = pair['input'];
+        input_grid = convertSerializedGridToGridObject(values)
+        values = pair['output'];
+        output_grid = convertSerializedGridToGridObject(values)
+        fillPairPreview(i, input_grid, output_grid);
+    }
+    for (var i=0; i < test.length; i++) {
+        pair = test[i];
+        TEST_PAIRS.push(pair);
+    }
+    values = TEST_PAIRS[0]['input'];
+    CURRENT_INPUT_GRID = convertSerializedGridToGridObject(values)
+    fillTestInput(CURRENT_INPUT_GRID);
+    CURRENT_TEST_PAIR_INDEX = 0;
+    $('#current_test_input_id_display').html('1');
+    $('#total_test_input_count_display').html(test.length);
+}
+
 function loadTask(e) {
     var file = e.target.files[0];
     if (!file) {
@@ -128,32 +153,32 @@ function loadTask(e) {
         } catch (e) {
             errorMsg('Bad file format');
         }
-
-        resetTask();
-        $('#modal_bg').hide();
-        $('#error_display').hide();
-        $('#info_display').hide();
-
-        for (var i = 0; i < train.length; i++) {
-            pair = train[i];
-            values = pair['input'];
-            input_grid = convertSerializedGridToGridObject(values)
-            values = pair['output'];
-            output_grid = convertSerializedGridToGridObject(values)
-            fillPairPreview(i, input_grid, output_grid);
-        }
-        for (var i=0; i < test.length; i++) {
-            pair = test[i];
-            TEST_PAIRS.push(pair);
-        }
-        values = TEST_PAIRS[0]['input'];
-        CURRENT_INPUT_GRID = convertSerializedGridToGridObject(values)
-        fillTestInput(CURRENT_INPUT_GRID);
-        CURRENT_TEST_PAIR_INDEX = 0;
-        $('#current_test_input_id_display').html('1');
-        $('#total_test_input_count_display').html(test.length);
+        loadJSONTask(train, test);
     };
     reader.readAsText(file);
+}
+
+function randomTask() {
+    var subset = "training";
+    $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + subset, function(tasks) {
+      var task = tasks[Math.floor(Math.random() * tasks.length)];
+      $.getJSON(task["download_url"], function(json) {
+          try {
+              train = json['train'];
+              test = json['test'];
+          } catch (e) {
+              errorMsg('Bad file format');
+          }
+          loadJSONTask(train, test);
+          infoMsg("Loaded task training/" + task["name"]);
+      })
+      .error(function(){
+        errorMsg('Error loading task');
+      });
+    })
+    .error(function(){
+      errorMsg('Error loading task list');
+    });
 }
 
 function nextTestInput() {

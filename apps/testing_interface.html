@@ -15,15 +15,7 @@
         <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
     </head>
-    <body>
-
-        <div id="modal_bg">
-            <div id="modal">
-                <div>Welcome to the ARC testing interface. <br> Select a task file to start.</div>
-                <br>
-                <input type="file" id="load_task_file_input" class="load_task"/>
-            </div>
-        </div>
+    <body onload="randomTask()">
         <div id="workspace">
 
             <div id="demonstration_examples_view">
@@ -46,6 +38,7 @@
                     <div id="load_task_control_btns">
                         <label for="load_task_file_input">Load task JSON: </label>
                         <input type="file" id="load_task_file_input" class="load_task"/>
+                        <button onclick="randomTask()" id="random_task_btn">Random task</button>
                     </div>
 
                     <div id="edition_view">
