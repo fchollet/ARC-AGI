@@ -7,7 +7,7 @@
 import pandas as pd
 import json
 import numpy as np
-# from itertools import izip
+from sys import argv
 
 def read_json_file(fileName):
     with open(fileName, 'r') as f:
@@ -47,14 +47,15 @@ def solve(my_ip):
     return np.flipud(ip)
     
  
+
 def main():
-    df = read_json_file('C:/dev/git/ARC/data/training/1bfc4729.json')
-#     np.array_equal(solve(df['train'][1]['input']), df['train'][1]['output'])
-    for df in df['train']:
-        np.array_equal(solve(df['input']), df['output'])
-        
-#     for df in df['test']:
-#         np.array_equal(solve(df['input']), df['output'])
+    df = read_json_file(argv[1])
+    for df1 in df['train']:
+        print(solve(df1))
+        print() 
+    for df2 in df['test']:
+        print(solve(df1))
+        print() 
     
         
     
