@@ -23,7 +23,7 @@ def read_file(pathToFile):
 def print_grid(data):
     for input in data:
         counter = 0
-        dimention = len(input)
+        dimention = len(input[0])
         arr = np.asarray(input).flatten()
         for i in arr:
             print(i, end=" ")
