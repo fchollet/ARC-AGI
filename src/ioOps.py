@@ -12,3 +12,15 @@ def read_file(pathToFile):
         for i in itertools.chain(train, test):
             lists.append(np.asarray(i["input"]))
         return np.asarray(lists)
+
+def print_grid(data):
+    for input in data:
+        counter = 0
+        dimention = len(input)
+        arr = np.asarray(input).flatten()
+        for i in arr:
+            print(i, end=" ")
+            counter += 1
+            if (counter % dimention == 0):
+                print()
+        print("\n")
