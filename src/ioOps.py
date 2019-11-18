@@ -1,6 +1,13 @@
 import numpy as np
 import json
 import itertools
+from sys import exit
+
+def get_file_path(args):
+    if len(args) <= 1:
+        print("Please provide path to the input file")
+        exit(-1)
+    return args[1]
 
 def read_file(pathToFile):
     lists = []

@@ -1,7 +1,8 @@
 # This file will have the solution for the task a699fb00
-from ioOps import read_file, print_grid
+from ioOps import read_file, print_grid, get_file_path
 import numpy as np
 import json
+import sys
 
 def solve(data):
     for input in data:
@@ -11,7 +12,8 @@ def solve(data):
                     row[index + 1] = 2
     return np.asarray(data)
 
-inputFilePath = "data/training/a699fb00.json"
-data = read_file(inputFilePath)
-grid = solve(data)
-print_grid(grid)
+if __name__ == "__main__":
+    inputFilePath = get_file_path(sys.argv)
+    data = read_file(inputFilePath)
+    grid = solve(data)
+    print_grid(grid)
