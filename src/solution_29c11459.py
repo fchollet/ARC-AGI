@@ -1,7 +1,6 @@
 #This file has the solution to the task 29c11459.json
 
 from ioOps import read_file, get_file_path, print_grid
-import numpy as np
 import json
 import sys
 

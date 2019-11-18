@@ -1,6 +1,5 @@
 # This file will have the solution for the task a699fb00
 from ioOps import read_file, print_grid, get_file_path
-import numpy as np
 import json
 import sys
 
@@ -10,7 +9,7 @@ def solve(data):
             for index in range(len(row) - 2):
                 if row[index] == 1 and row[index + 2] == 1:
                     row[index + 1] = 2
-    return np.asarray(data)
+    return data
 
 if __name__ == "__main__":
     inputFilePath = get_file_path(sys.argv)

@@ -30,4 +30,4 @@ def print_grid(data):
             counter += 1
             if (counter % dimention == 0):
                 print()
-        print("\n")
+        print()
