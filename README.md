@@ -14,11 +14,11 @@ The aim of this assignment is to pick three tasks from the ARC/data/training dir
 
 The tasks I selected are:
 
-*d037b0a7.json
-*ed36ccf7.json
-*a85d4709.json
+* d037b0a7.json
+* ed36ccf7.json
+* a85d4709.json
 
 ## Program Execution
 
 Each program is runnable at the command-line as follows: 
-'$ python solution 017c7c7b.py path/to/017c7c7b.json'
+```$ python solution 017c7c7b.py path/to/017c7c7b.json```
