@@ -1,5 +1,6 @@
 import json
 import numpy as np
+import matplotlib.pyplot as plt
 
 def json_arc_reader(file_name):
     json_file = open(file_name)
@@ -35,4 +36,10 @@ for i in range(row_min,row_max+1):
 ok = np.reshape(ok,(row_max-row_min+1,col_max-col_min+1))
 print(type(ok))
 print(ok.shape)
-print(ok)     
+print(ok)    
+
+plt.matshow(c[0])
+plt.show()  
+
+plt.matshow(ok)
+plt.show()   
