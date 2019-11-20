@@ -6,6 +6,7 @@ Student name(s): Ian Matthews
 Student ID(s):   12100610
 
 """
+import numpy as np
 
 
 def solve(input_grid):
@@ -16,8 +17,12 @@ def solve(input_grid):
     or 3. a Numpy 2D array of type int
     :param input_grid:
     :return: output_grid
+    >>> ip =  [[0, 0, 0], [5, 0, 0], [0, 5, 5]]
+    >>> solve(ip)
+    [[0, 0, 5], [0, 0, 5], [0, 5, 0]]
+
     """
-    pass
+    return input_grid
 
 
 def main():
