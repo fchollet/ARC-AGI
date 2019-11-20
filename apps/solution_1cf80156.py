@@ -40,6 +40,5 @@ print(ok)
 
 plt.matshow(c[0])
 plt.show()  
-
 plt.matshow(ok)
 plt.show()   
