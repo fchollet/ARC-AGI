@@ -19,10 +19,11 @@ def solve(input_grid):
     :return: output_grid
     >>> ip =  [[0, 0, 0], [5, 0, 0], [0, 5, 5]]
     >>> solve(ip)
-    [[0, 0, 5], [0, 0, 5], [0, 5, 0]]
-
+    array([[0, 0, 5],
+           [0, 0, 5],
+           [0, 5, 0]])
     """
-    return input_grid
+    return np.rot90(input_grid)
 
 
 def main():
