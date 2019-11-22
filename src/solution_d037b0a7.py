@@ -11,6 +11,13 @@ import sys
 from common_utils import load_file, print_grid
 
 
+def fill_grid_columns(item, grid, output):
+    r = item[0]
+    c = item[1]
+    output[r:3, c] = grid[r][c]
+    return output
+
+
 def solve(input_grid):
     """
     Given the input grid from any training or evaluation pair in the input json file,
@@ -32,10 +39,7 @@ def solve(input_grid):
 
     # iterate over the columns, filling each column by the row range
     output = np.zeros(grid.shape, dtype=int)
-    for i in range(row_heights.shape[1]):
-        r = row_heights[i][0]
-        c = row_heights[i][1]
-        output[r:3, c] = grid[r][c]
+    [fill_grid_columns(coords, grid, output) for coords in row_heights]
 
     return output
 
