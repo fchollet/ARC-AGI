@@ -113,3 +113,6 @@ target
 .vscode
 *.code-workspace
 .factorypath
+
+# random
+.Rhistory
