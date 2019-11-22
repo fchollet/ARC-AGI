@@ -88,7 +88,6 @@ def solve(input_grid):
     for j in range(grid.shape[1]):
         if np.all(grid[:, j] == 0):
             grid[:, j] = 2
-
     # colour in rows
     for row in range(len(rows)):
         grid[rows[row], :] = 2
