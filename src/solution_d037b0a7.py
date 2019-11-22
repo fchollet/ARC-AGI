@@ -11,9 +11,23 @@ import sys
 from common_utils import load_file, print_grid
 
 
-def fill_grid_columns(item, grid, output):
-    r = item[0]
-    c = item[1]
+def fill_grid_columns(row_coords, grid, output):
+    """
+
+    :param row_coords: Get the height of the row we want to fill
+    :param grid: the input grid to source the colour
+    :param output: the output grid
+    :return:
+    >>> rc = np.asarray([0, 2])
+    >>> op = np.asarray([[0, 0, 0], [0, 0, 0], [0, 0, 0]])
+    >>> ip = np.asarray([[0, 0, 6], [0, 4, 0], [3, 0, 0]])
+    >>> fill_grid_columns(rc, ip, op)
+    array([[0, 0, 6],
+           [0, 0, 6],
+           [0, 0, 6]])
+    """
+    r = row_coords[0]
+    c = row_coords[1]
     output[r:3, c] = grid[r][c]
     return output
 
@@ -57,4 +71,4 @@ def main():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    main()
+    # main()
