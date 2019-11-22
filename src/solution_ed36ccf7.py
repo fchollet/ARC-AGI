@@ -7,36 +7,8 @@ Student ID(s):   12100610
 
 """
 import numpy as np
-import json
 import sys
-from itertools import chain
-
-
-def load_file(filename):
-    """
-    do I ned to be able to handle the three input types?
-    :param filename:
-    :return:
-    >>> load_file('../data/training/ed36ccf7.json')
-    [[[9, 0, 0], [9, 9, 9], [9, 9, 9]], [[6, 6, 6], [0, 0, 0], [6, 6, 0]], [[0, 0, 9], [0, 0, 9], [9, 9, 9]], [[2, 0, 2], [0, 0, 2], [0, 2, 2]], [[0, 0, 0], [5, 0, 0], [0, 5, 5]]]
-    """
-    X = json.load(open(filename))
-    train = X["train"]
-    test = X["test"]
-    inputs = [i["input"] for i in chain(train, test)]
-    return inputs
-
-
-def print_grid(grid):
-    """
-    Print the output grids as a grid of integers with a space a separator.  There should be
-    a space between grids so adding one here after the output
-    :param grid:
-    :return:
-    """
-    for row in grid:
-        print(" ".join(map(str, row)))
-    print(end="\n")
+from common_utils import load_file, print_grid
 
 
 def solve(input_grid):
