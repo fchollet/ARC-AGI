@@ -13,7 +13,6 @@ from common_utils import load_file, print_grid
 
 def fill_grid_columns(row_coords, grid, output):
     """
-
     :param row_coords: Get the height of the row we want to fill
     :param grid: the input grid to source the colour
     :param output: the output grid
@@ -71,4 +70,4 @@ def main():
 if __name__ == "__main__":
     import doctest
     doctest.testmod()
-    # main()
+    main()
