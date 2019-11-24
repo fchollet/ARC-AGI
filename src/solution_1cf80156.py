@@ -1,9 +1,9 @@
 import sys
 import numpy as np
-import utils.read_json as rj
+import utils.common_utility as cu 
 
 with open(sys.argv[1], 'r') as j_file:
-    a,b,c,d = rj.json_arc_reader(j_file)
+    a,b,c,d = cu.json_arc_reader(j_file)
     cnp = np.array(c[0])
     res = np.where(cnp>0)
     col_min = min(res[1])
@@ -20,4 +20,4 @@ test_result = np.reshape(test_result,(row_max-row_min+1,col_max-col_min+1))
 
 print(test_result)
 plt_list = [c[0], test_result]
-rj.visualize(plt_list)
+cu.visualize(plt_list)

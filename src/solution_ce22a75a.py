@@ -1,10 +1,10 @@
 import sys
 import numpy as np
-import utils.read_json as rj
+import utils.common_utilities as cu
 
 
 with open(sys.argv[1], 'r') as j_file:
-    a,b,c,d =rj.json_arc_reader(j_file)
+    a,b,c,d =cu.json_arc_reader(j_file)
     test_result = np.array(c[0])
     res = np.where(test_result>0)
     for i in list(zip(res[0], res[1])):     
@@ -16,4 +16,4 @@ with open(sys.argv[1], 'r') as j_file:
 
 print(test_result)
 plt_list = [c[0], test_result]
-rj.visualize(plt_list)
+cu.visualize(plt_list)
