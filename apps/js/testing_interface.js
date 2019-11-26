@@ -137,7 +137,7 @@ function loadJSONTask(train, test) {
     $('#total_test_input_count_display').html(test.length);
 }
 
-function loadTask(e) {
+function loadTaskFromFile(e) {
     var file = e.target.files[0];
     if (!file) {
         errorMsg('No file selected');
@@ -153,6 +153,7 @@ function loadTask(e) {
             test = contents['test'];
         } catch (e) {
             errorMsg('Bad file format');
+            return;
         }
         loadJSONTask(train, test);
     };
@@ -169,6 +170,7 @@ function randomTask() {
               test = json['test'];
           } catch (e) {
               errorMsg('Bad file format');
+              return;
           }
           loadJSONTask(train, test);
           infoMsg("Loaded task training/" + task["name"]);
@@ -276,7 +278,7 @@ $(document).ready(function () {
     });
 
     $('.load_task').on('change', function(event) {
-        loadTask(event);
+        loadTaskFromFile(event);
     });
 
     $('input[type=radio][name=tool_switching]').change(function() {
