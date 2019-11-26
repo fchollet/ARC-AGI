@@ -113,6 +113,7 @@ function fillPairPreview(pairId, inputGrid, outputGrid) {
 
 function loadJSONTask(train, test) {
     resetTask();
+    $('#modal_bg').hide();
     $('#error_display').hide();
     $('#info_display').hide();
 
