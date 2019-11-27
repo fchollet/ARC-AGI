@@ -36,4 +36,4 @@ def visualize(input):
     '''
     for i in range(len(input)):
         plt.matshow(input[i])
-        plt.show()
+    plt.show()
