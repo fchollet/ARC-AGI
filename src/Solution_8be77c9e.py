@@ -7,6 +7,7 @@ Created on Fri Nov 22 19:51:45 2019
 
 import json
 import os
+import sys
 print(os.getcwd())
 
 def json_arc_reader(file_name):
@@ -21,7 +22,8 @@ def json_arc_reader(file_name):
 
 os.chdir("..")
 os.chdir("data/training")
-train_input,train_output,test_input,test_output = json_arc_reader('8be77c9e.json')
+file = sys.argv[1]
+train_input,train_output,test_input,test_output = json_arc_reader(sys.argv[1])
 
 def manipulate(inputData):
     array = inputData[0]

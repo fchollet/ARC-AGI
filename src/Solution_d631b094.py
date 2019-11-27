@@ -8,6 +8,7 @@ Created on Fri Nov 22 00:33:23 2019
 import json
 import numpy as np
 import os
+import sys
 print(os.getcwd())
 
 def json_arc_reader(file_name):
@@ -20,9 +21,10 @@ def json_arc_reader(file_name):
     test_outputs = [data['test'][i]['output'] for i in range(len(data['test']))]
     return train_inputs,train_outputs,test_inputs,test_outputs
 
-os.chdir("..")
+os.chdir("../")
 os.chdir("data/training")
-train_input,train_output,test_input,test_output = json_arc_reader('d631b094.json')
+file = sys.argv[1]
+train_input,train_output,test_input,test_output = json_arc_reader(file)
 
 def manipulation(inputData):
     array = inputData[0]
