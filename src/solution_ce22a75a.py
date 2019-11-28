@@ -1,7 +1,7 @@
 import sys
 import numpy as np
 import utils.common_utility as cu
-
+from sklearn.metrics import mean_squared_error, r2_score
 '''
 Function to solve ARC task
 ---------------------------
@@ -13,10 +13,10 @@ Function call to utilitites package for reading the input json file.
 '''
 
 with open(sys.argv[1], 'r') as j_file:
-    train_in,train_out,test_in,test_out =cu.json_arc_reader(j_file)
+    train_in,train_out,test_in,test_out = cu.json_arc_reader(j_file)
 def solve(c):
     '''
-    The function returns an numpy array.
+    The function returns a numpy array by replacing all zeros around a pattern with the corresponding pattern value.
     
     Parameters:
     -----------
@@ -37,5 +37,5 @@ def solve(c):
     return test_result
 output = solve(test_in)
 print(output)
-plt_list = [test_in[0], output]
-cu.visualize(plt_list)
+#plt_list = [test_in[0], output]
+#cu.visualize(plt_list)

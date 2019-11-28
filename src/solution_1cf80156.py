@@ -14,7 +14,7 @@ Function call to utilitites package for reading the input json file.
 '''
 
 with open(sys.argv[1], 'r') as j_file:
-    a,b,c,d = cu.json_arc_reader(j_file)
+    train_in,train_out,test_in,test_out = cu.json_arc_reader(j_file)
 
 
 def solve(c):
@@ -42,7 +42,7 @@ def solve(c):
     test_result = np.reshape(test_result,(row_max-row_min+1,col_max-col_min+1))
     return test_result
     
-output = solve(c)
+output = solve(test_in)
 print(output)
-plt_list = [c[0], output]
-cu.visualize(plt_list)
+#plt_list = [c[0], output]
+#cu.visualize(plt_list)
