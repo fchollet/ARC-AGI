@@ -8,17 +8,16 @@ Created on Fri Nov 22 00:33:23 2019
 import numpy as np
 import os
 import sys
-from Utils import common_utilities as utils
-
+import Utils.common_utilities as utils
 
 os.chdir("../")
-os.chdir("data/training")
+os.chdir("data")
 file = sys.argv[1]
 train_input,train_output,test_input,test_output = utils.json_reader(file)
 
 
 def solve(inputData):
-    array = inputData[0]
+    array = inputData
     print("\n Input: \n",array)
     output = [[]] 
     for i in range(len(array)):
@@ -30,20 +29,21 @@ def solve(inputData):
 
 
 print("\n\nTRANING")
-
-result = []
-result.append(solve(train_input))
-print(" Output:\n",result)
-trainOutput = []
-trainOutput.append(train_output[0])
-if(trainOutput == result):
-    print("Training Successfull")
+for i in range(len(train_input)):
+    result = []
+    inputData = train_input[i]
+    result.append(solve(inputData))
+    print(" Output:\n",result)
+    trainOutput = []
+    trainOutput.append(train_output[i])
+    if(trainOutput == result):
+        print("Training Successfull for training input ", i)
     
 
 print("\n\nTESTING")
 
 output = []
-output.append(solve(test_input))
+output.append(solve(test_input[0]))
 print(" Output:\n",output)
 if(test_output == output):
     print(" Testing Successfull")
