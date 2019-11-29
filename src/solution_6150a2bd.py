@@ -12,7 +12,7 @@ Task Number : 6150a2bd
 Function call to utilitites package for reading the input json file.
 '''
 with open(sys.argv[1], 'r') as j_file:
-    train_in,train_out,test_in,test_out = cu.json_arc_reader(j_file) 
+    train_in,train_out,test_in,test_out = cu.json_src_reader(j_file) 
 
 def solve(inputs):
     '''

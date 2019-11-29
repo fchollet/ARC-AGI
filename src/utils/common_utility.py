@@ -5,7 +5,7 @@ import json
 import matplotlib.pyplot as plt
 
 
-def json_arc_reader(json_file):
+def json_src_reader(json_file):
     '''
     Function to read and return the json file and split the data into train input, train output, test input, test output. 
     
