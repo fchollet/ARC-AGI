@@ -24,28 +24,24 @@ def solve(inputs):
     
     Returns:
     --------
-    test_result = returns a numpy ndarray, size of which depends on the task.
+    test_result = returns a numpy ndarray, size of which depends on the input.
     '''
-    test_res = []
-    for m in range(len(inputs)):
-        test_result = np.array(inputs[m])
-        res = np.where(test_result>0)
-        for i in list(zip(res[0], res[1])):     
-            for x in range(-1,2):
-                for y in range(-1,2):
-                    if (x != 0 or y != 0):
-                        test_result[i[0]-x][i[1]-y] = 1
-                        test_result[i[0]][i[1]] = 1 
-                        
-        test_res.append(test_result.tolist())
-    return test_res
+    test_result = np.array(inputs)
+    res = np.where(test_result>0)
+    for i in list(zip(res[0], res[1])):     
+        for x in range(-1,2):
+            for y in range(-1,2):
+                if (x != 0 or y != 0):
+                    test_result[i[0]-x][i[1]-y] = 1
+                    test_result[i[0]][i[1]] = 1                                 
+    return test_result
 
 
-output1 = solve(train_in)
-print(output1)
-print()
-output2 = solve(test_in)
-print(output2)
- 
-#plt_list = [test_in[0], output]
-#cu.visualize(plt_list)
+for inputs in (train_in + test_in):
+    outputs = solve(inputs)
+    print(outputs)
+    print()
+
+    'Additional line to visualize the test input and test output'
+    #plt_list = [inputs, outputs]
+    #cu.visualize(plt_list)
