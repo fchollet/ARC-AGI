@@ -26,15 +26,14 @@ def json_src_reader(json_file):
     return train_inputs,train_outputs,test_inputs,test_outputs
 
 
-def visualize(input1,input2):
+def visualize(input):
     '''
     Function to plot grids and emulate testing interface.
     
     Parameters: 
     -----------
-    input1 = A list of test input.
-    input2 = A list of computed output
+    input = A list of test input and computed output.
     '''
-    plt.matshow(input1)
-    plt.matshow(input2)   
+    for i in range(len(input)):
+        plt.matshow(input[i])
     plt.show()
