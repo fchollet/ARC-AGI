@@ -50,9 +50,9 @@ The solutions can be tested using the command line interface by specifying the p
 `solution_ce22a75a.py - python solution_ce22a75a.py <<path_to_repository>>\ARC\data\<<training or evaluation\json file>>`
 
 ## Solutions Using the Visualize Method Call
-![Task 1](/apps/img/1.png)
-![Task 2](/apps/img/2.png)
-![Task 3](/apps/img/3.png)
+![Task 1](/apps/img/1.PNG)
+![Task 2](/apps/img/2.PNG)
+![Task 3](/apps/img/3.PNG)
 
 # Functionalities from Original ARC Repository
 ## Usage of the testing interface
