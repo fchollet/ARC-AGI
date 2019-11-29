@@ -1,13 +1,25 @@
-# The Abstraction and Reasoning Corpus (ARC)
+# Python Code Solutions for The Abstraction and Reasoning Corpus (ARC)
 
-This repository contains the ARC task data, as well as a browser-based interface for humans to try their hand at solving the tasks manually.
+This repository contains hand written python code for the ARC task data, as well as a browser-based interface to try out the tasks manually which was readily available from the previous repository.
 
-*"ARC can be seen as a general artificial intelligence benchmark, as a program synthesis benchmark, or as a psychometric intelligence test. It is targeted at both humans and artificially intelligent systems that aim at emulating a human-like form of general fluid intelligence."*
+*"The ability to create abstractions from knowledge representations is one of the hallmarks of human intelligence. This is one of the reasons which allowed many of our scientists such as Isaac Newton and Albert Einstein to formulate and invent new concepts. Abstract reasoning has long been used as an example that separates human cognition from artificial intelligence(AI)"*
 
 A complete description of the dataset, its goals, and its underlying logic, can be found in: [The Measure of Intelligence](https://arxiv.org/abs/1911.01547).
 
-As a reminder, a test-taker is said to solve a task when, upon seeing the task for the first time, they are able to produce the correct output grid for *all* test inputs in the task (this includes picking the dimensions of the output grid). For each test input, the test-taker is allowed 3 trials (this holds for all test-takers, either humans or AI).
+## Project Structure
+The `repository` consists of three directories and one sub directory within the `src` folder.
+- `apps`
+- `data`
+- `src`
+    -  `utils`
 
+## Source Code
+The `src` directory consists of hand written python code for three of the tasks namely.
+- `1cf80156.json`
+- `6150a2bd.json`
+- `ce22a75a.json`
+
+Additionally, there is a sub directory `utils` which consists of the helper functions in order for the code to run. It contains a python file `common_utility.py` which consists of functions to read the `input json` file and split the `train-test inputs and outputs`, it also contains another function to visualize the inputs and output after running through the solution files in order to emulate the `testinginterface.html`.  
 
 ## Task file format
 
@@ -28,9 +40,17 @@ A "pair" is a dictionary with two fields:
 
 A "grid" is a rectangular matrix (list of lists) of integers between 0 and 9 (inclusive). The smallest possible grid size is 1x1 and the largest is 30x30.
 
-When looking at a task, a test-taker has access to inputs & outputs of the demonstration pairs, plus the input(s) of the test pair(s). The goal is to construct the output grid(s) corresponding to the test input grid(s), using 3 trials for each test input. "Constructing the output grid" involves picking the height and width of the output grid, then filling each cell in the grid with a symbol (integer between 0 and 9, which are visualized as colors). Only *exact* solutions (all cells match the expected answer) can be said to be correct.
+## Usage of Command Line Arguments
+The solutions can be tested using the command line interface by specifying the path to the input json file in either training or evaluation in the data directory .
+
+`solution_1cf80156.py - python solution_1cf80156.py <<path_to_repository>>\ARC\data\<<training or evaluation\json file>>`
+
+`solution_6150a2bd.py - python solution_6150a2bd.py <<path_to_repository>>\ARC\data\<<training or evaluation\json file>>`
+
+`solution_ce22a75a.py - python solution_ce22a75a.py <<path_to_repository>>\ARC\data\<<training or evaluation\json file>>`
 
 
+# Functionalities from Original ARC Repository
 ## Usage of the testing interface
 
 The testing interface is located at `apps/testing_interface.html`. Open it in a web browser (Chrome recommended). It will prompt you to select a task JSON file.
