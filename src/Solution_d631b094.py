@@ -19,12 +19,12 @@ train_input,train_output,test_input,test_output = utils.json_reader(file)
 def solve(inputData):
     array = inputData
     print("\n Input: \n",array)
-    output = [[]] 
+    output = [] 
     for i in range(len(array)):
         arr = np.array(array[i])
         for j in range(len(arr)):
             if arr[j] != 0:
-                output[0].append(arr[j])
+                output.append(arr[j])
     return output
 
 
@@ -34,9 +34,7 @@ for i in range(len(train_input)):
     inputData = train_input[i]
     result.append(solve(inputData))
     print(" Output:\n",result)
-    trainOutput = []
-    trainOutput.append(train_output[i])
-    if(trainOutput == result):
+    if(train_output[i] == result):
         print("Training Successfull for training input ", i)
     
 
@@ -45,5 +43,5 @@ print("\n\nTESTING")
 output = []
 output.append(solve(test_input[0]))
 print(" Output:\n",output)
-if(test_output == output):
+if(test_output[0] == output):
     print(" Testing Successfull")
