@@ -5,7 +5,6 @@ Created on Wed Nov 27 23:06:57 2019
 @author: Sampritha H M
 """
 import json
-import matplotlib.pyplot as plt
 
 def json_reader(file_name):
     json_file = open(file_name)
@@ -18,11 +17,11 @@ def json_reader(file_name):
     return train_inputs,train_outputs,test_inputs,test_outputs
 
 
-def visualize(input):
+'''def visualize(input):
     """
     Function to plot grids and emulate testing interface.
     input = A list of test input and computed output. 
     """
     for i in range(len(input)):
         plt.matshow(input[i])
-        plt.show()
+        plt.show()'''
