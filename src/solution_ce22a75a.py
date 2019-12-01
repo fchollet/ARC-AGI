@@ -28,12 +28,16 @@ def solve(inputs):
     '''
     test_result = np.array(inputs)
     res = np.where(test_result>0)
-    for i in list(zip(res[0], res[1])):     
-        for x in range(-1,2):
-            for y in range(-1,2):
-                if (x != 0 or y != 0):
-                    test_result[i[0]-x][i[1]-y] = 1
-                    test_result[i[0]][i[1]] = 1                                 
+    try:
+        
+        for i in list(zip(res[0], res[1])):     
+            for x in range(-1,2):
+                for y in range(-1,2):
+                    if (x != 0 or y != 0):
+                        test_result[i[0]-x][i[1]-y] = 1
+                        test_result[i[0]][i[1]] = 1 
+    except IndexError: # catch the error
+        pass #we are passing the if any point is at the corner                         
     return test_result
 
 
