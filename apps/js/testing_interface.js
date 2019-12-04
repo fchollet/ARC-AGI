@@ -173,6 +173,7 @@ function randomTask() {
               return;
           }
           loadJSONTask(train, test);
+          $('#load_task_file_input')[0].value = "";
           infoMsg("Loaded task training/" + task["name"]);
       })
       .error(function(){
@@ -279,6 +280,10 @@ $(document).ready(function () {
 
     $('.load_task').on('change', function(event) {
         loadTaskFromFile(event);
+    });
+
+    $('.load_task').on('click', function(event) {
+      event.target.value = "";
     });
 
     $('input[type=radio][name=tool_switching]').change(function() {
