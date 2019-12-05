@@ -12,4 +12,5 @@ def hello():
 
 
 if __name__ == '__main__':
+    """main method"""
     app.run()
