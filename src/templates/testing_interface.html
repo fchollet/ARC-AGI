@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>ARC testing interface</title>
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+        <script src="{{ url_for('static',filename='js/common.js') }}"></script>
+        <script src="{{ url_for('static',filename='js/testing_interface.js') }}"></script>
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/common.css') }}">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='css/testing_interface.css') }}">
+
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+
+    </head>
+    <body>
+        <div id="modal_bg">
+            <div id="modal">
+                <div>Welcome to the ARC testing interface. <br /> Choose a task file to start, or click on "Random task" to load one from the ARC project on github.</div>
+                <br />
+                <input type="file" id="load_task_file_input" class="load_task"/>
+                <button onclick="randomTask()" id="random_task_btn">Random task</button>
+            </div>
+        </div>
+        <div id="workspace">
+
+            <div id="demonstration_examples_view">
+                <div class="text" id="task_demo_header">Task demonstration</div>
+                <div id="task_preview"></div>
+            </div>
+
+            <div id="evaluation_view">
+
+                <div id="evaluation-input-view">
+                    <div class="text">Test input grid <span id="current_test_input_id_display">0</span>/<span id="total_test_input_count_display">0</span>
+                        <button onclick="nextTestInput()">Next test input</button>
+                    </div>
+
+                    <div id="evaluation_input" class="selectable_grid"></div>
+                </div>
+
+                <div id="evaluation_output_editor">
+
+                    <div id="load_task_control_btns">
+                        <label for="load_task_file_input">Load task JSON: </label>
+                        <input type="file" id="load_task_file_input" class="load_task"/>
+                        <button onclick="randomTask()" id="random_task_btn">Random task</button>
+                    </div>
+
+                    <div id="edition_view">
+                        <div id="editor_grid_control_btns">
+                            <div id="resize_control_btns">
+                                <label for="output_grid_size">Change grid size: </label>
+                                <input type="text" id="output_grid_size" class="grid_size_field" name="size" value="3x3">
+                                <button onclick="resizeOutputGrid()" id="resize_btn">Resize</button>
+                            </div>
+
+                            <button onclick="copyFromInput()">Copy from input</button>
+                            <button onclick="resetOutputGrid()">Reset grid</button>
+                            <button onclick="submitSolution()" id="submit_solution_btn">Submit!</button>
+                        </div>
+
+                        <div id="output_grid">
+                            <div class="edition_grid selectable_grid">
+                                <div class="row">
+                                    <div class="cell" symbol="0" x="0" y="0"></div>
+                                    <div class="cell" symbol="0" x="0" y="1"></div>
+                                    <div class="cell" symbol="0" x="0" y="2"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="cell" symbol="0" x="1" y="0"></div>
+                                    <div class="cell" symbol="0" x="1" y="1"></div>
+                                    <div class="cell" symbol="0" x="1" y="2"></div>
+                                </div>
+                                <div class="row">
+                                    <div class="cell" symbol="0" x="2" y="0"></div>
+                                    <div class="cell" symbol="0" x="2" y="1"></div>
+                                    <div class="cell" symbol="0" x="2" y="2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div id="toolbar">
+                            <div>
+                                <input type="radio" id="tool_edit"
+                                 name="tool_switching" value="edit" checked>
+                                <label for="tool_edit">Edit</label>
+
+                                <input type="radio" id="tool_select"
+                                 name="tool_switching" value="select">
+                                <label for="tool_select">Select</label>
+
+                                <input type="radio" id="tool_floodfill"
+                                 name="tool_switching" value="floodfill">
+                                <label for="tool_floodfill">Flood fill</label>
+                            </div>
+                        </div>
+
+                        <div id="symbol_picker">
+                            <div class="symbol_preview symbol_0 selected" symbol="0"></div>
+                            <div class="symbol_preview symbol_1" symbol="1"></div>
+                            <div class="symbol_preview symbol_2" symbol="2"></div>
+                            <div class="symbol_preview symbol_3" symbol="3"></div>
+                            <div class="symbol_preview symbol_4" symbol="4"></div>
+                            <div class="symbol_preview symbol_5" symbol="5"></div>
+                            <div class="symbol_preview symbol_6" symbol="6"></div>
+                            <div class="symbol_preview symbol_7" symbol="7"></div>
+                            <div class="symbol_preview symbol_8" symbol="8"></div>
+                            <div class="symbol_preview symbol_9" symbol="9"></div>
+                        </div>
+                    </div>
+
+                    <div id="error_display"></div>
+                    <div id="info_display"></div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
