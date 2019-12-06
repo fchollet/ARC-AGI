@@ -7,12 +7,13 @@ To make it snappy it currently is only fetching from the data folder
 import os
 import json
 import random
+from pathlib import Path
 
 
 class ProblemFetcher:
 
-    def __init__(self, evaluation_fdr=os.path.join('..', '..', 'data', 'evaluation'),
-                 training_fdr=os.path.join('..', '..', 'data', 'training')):
+    def __init__(self, evaluation_fdr=os.path.join(Path(__file__).parent.parent.parent, 'data', 'evaluation'),
+                 training_fdr=os.path.join(Path(__file__).parent.parent.parent,  'data', 'training')):
         self.evaluation_folder = evaluation_fdr
         self.training_folder = training_fdr
 
