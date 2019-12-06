@@ -1,4 +1,4 @@
-from ..models.problem_fetcher import ProblemFetcher
+from src.models.problem_fetcher import ProblemFetcher
 import pytest
 import json
 

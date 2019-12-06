@@ -1,4 +1,5 @@
 from flask import Flask, render_template
+from src.models.problem_fetcher import ProblemFetcher
 app = Flask(__name__)
 
 
