@@ -1,8 +1,8 @@
 .cell {
     width: 100px;
     height: 100px;
-    border-left: 1px solid #aaa;
-    border-top: 1px solid #aaa;
+    border-left: 1px solid #555;
+    border-top: 1px solid #555;
     float: left;
     background-color: #000;
 }
