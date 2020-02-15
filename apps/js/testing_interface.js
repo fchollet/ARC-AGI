@@ -179,7 +179,7 @@ function randomTask() {
             big_space = '&nbsp;'.repeat(4); 
             document.getElementById('task_nm').innerHTML = (
                 'task nm:' + big_space + task['name'] + big_space +
-                + '(' + String(idx) + '/' + String(tasks.length) + ')'
+                + String(idx) + '/' + String(tasks.length)
             );
         })
         .error(function(){
