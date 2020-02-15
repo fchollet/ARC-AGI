@@ -137,6 +137,16 @@ function loadJSONTask(train, test) {
     $('#total_test_input_count_display').html(test.length);
 }
 
+function display_task_nm(task_nm, idx, nb_tasks) {
+    big_space = '&nbsp;'.repeat(4); 
+    document.getElementById('task_nm').innerHTML = (
+        'Task name:' + big_space + task_nm + big_space + (
+            idx===null ? '' :
+            ( String(idx) + ' out of ' + String(nb_tasks) )
+        )
+    );
+}
+
 function loadTaskFromFile(e) {
     var file = e.target.files[0];
     if (!file) {
@@ -156,6 +166,9 @@ function loadTaskFromFile(e) {
             return;
         }
         loadJSONTask(train, test);
+
+        $('#load_task_file_input')[0].value = "";
+        display_task_nm(file.name, null, null);
     };
     reader.readAsText(file);
 }
@@ -174,13 +187,9 @@ function randomTask() {
                 return;
             }
             loadJSONTask(train, test);
-            $('#load_task_file_input')[0].value = "";
+            //$('#load_task_file_input')[0].value = "";
             infoMsg("Loaded task training/" + task["name"]);
-            big_space = '&nbsp;'.repeat(4); 
-            document.getElementById('task_nm').innerHTML = (
-                'task nm:' + big_space + task['name'] + big_space +
-                + String(idx) + '/' + String(tasks.length)
-            );
+            display_task_nm(task['name'], idx, tasks.length);
         })
         .error(function(){
           errorMsg('Error loading task');

@@ -45,10 +45,11 @@
 
                     <div id="load_task_control_btns">
                         <label for="load_task_file_input">Load task JSON: </label>
-                        <input type="file" id="load_task_file_input" class="load_task"/>
+                        <input type="file" id="load_task_file_input" class="load_task" style="display: none;"/>
+                        <input type="button" value="Browse..." onclick="document.getElementById('load_task_file_input').click();" />
+                        <button onclick="randomTask()" id="random_task_btn"> Random... </button>
                         <p>
-                        <button onclick="randomTask()" id="random_task_btn">Random task</button>
-                        <label id='task_nm' for="random_task_btn"> task not chosen </label>
+                        <label id='task_nm' for="random_task_btn"> Task name: </label>
                     </div>
 
                     <div id="edition_view">
