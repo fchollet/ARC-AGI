@@ -23,6 +23,10 @@ function floodfillFromLocation(grid, i, j, symbol) {
     symbol = parseInt(symbol);
 
     target = grid[i][j];
+    
+    if (target == symbol) {
+        return;
+    }
 
     function flow(i, j, symbol, target) {
         if (i >= 0 && i < grid.length && j >= 0 && j < grid[i].length) {
