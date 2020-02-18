@@ -356,5 +356,48 @@ $(document).ready(function () {
                 errorMsg('Can only paste at a specific location; only select *one* cell as paste destination.');
             }
         }
+        // Crop code
+        if (event.which == 82) {
+            // Press R
+            selected = $('.ui-selected');
+            if (selected.length == 0) {
+                return;
+            }
+
+            COPY_PASTE_DATA = [];
+            for (var i = 0; i < selected.length; i++) {
+                x = parseInt($(selected[i]).attr('x'));
+                y = parseInt($(selected[i]).attr('y'));
+                symbol = parseInt($(selected[i]).attr('symbol'));
+                COPY_PASTE_DATA.push([x, y, symbol]);
+            }
+
+            xs = new Array();
+            ys = new Array();
+            symbols = new Array();
+
+            for (var i = 0; i < COPY_PASTE_DATA.length; i++) {
+                xs.push(COPY_PASTE_DATA[i][0]);
+                ys.push(COPY_PASTE_DATA[i][1]);
+                symbols.push(COPY_PASTE_DATA[i][2]);
+            }
+
+            minx = Math.min(...xs);
+            miny = Math.min(...ys);
+            for (var i = 0; i < xs.length; i++) {
+                x = xs[i];
+                y = ys[i];
+                symbol = symbols[i];
+                newx = x - minx;
+                newy = y - miny;
+                res = jqGrid.find('[x="' + newx + '"][y="' + newy + '"] ');
+                if (res.length == 1) {
+                    cell = $(res[0]);
+                    setCellSymbol(cell, symbol);
+                }
+            }
+            $('#output_grid_size').val((xs[xs.length - 1] - minx + 1) + 'x' + (ys[ys.length - 1] - miny + 1));
+            resizeOutputGrid();
+        }
     });
 });
