@@ -137,6 +137,16 @@ function loadJSONTask(train, test) {
     $('#total_test_input_count_display').html(test.length);
 }
 
+function display_task_name(task_name, task_index, number_of_tasks) {
+    big_space = '&nbsp;'.repeat(4); 
+    document.getElementById('task_name').innerHTML = (
+        'Task name:' + big_space + task_name + big_space + (
+            task_index===null ? '' :
+            ( String(task_index) + ' out of ' + String(number_of_tasks) )
+        )
+    );
+}
+
 function loadTaskFromFile(e) {
     var file = e.target.files[0];
     if (!file) {
@@ -156,6 +166,9 @@ function loadTaskFromFile(e) {
             return;
         }
         loadJSONTask(train, test);
+
+        $('#load_task_file_input')[0].value = "";
+        display_task_name(file.name, null, null);
     };
     reader.readAsText(file);
 }
@@ -163,22 +176,24 @@ function loadTaskFromFile(e) {
 function randomTask() {
     var subset = "training";
     $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + subset, function(tasks) {
-      var task = tasks[Math.floor(Math.random() * tasks.length)];
-      $.getJSON(task["download_url"], function(json) {
-          try {
-              train = json['train'];
-              test = json['test'];
-          } catch (e) {
-              errorMsg('Bad file format');
-              return;
-          }
-          loadJSONTask(train, test);
-          $('#load_task_file_input')[0].value = "";
-          infoMsg("Loaded task training/" + task["name"]);
-      })
-      .error(function(){
-        errorMsg('Error loading task');
-      });
+        var task_index = Math.floor(Math.random() * tasks.length)
+        var task = tasks[task_index];
+        $.getJSON(task["download_url"], function(json) {
+            try {
+                train = json['train'];
+                test = json['test'];
+            } catch (e) {
+                errorMsg('Bad file format');
+                return;
+            }
+            loadJSONTask(train, test);
+            //$('#load_task_file_input')[0].value = "";
+            infoMsg("Loaded task training/" + task["name"]);
+            display_task_name(task['name'], task_index, tasks.length);
+        })
+        .error(function(){
+          errorMsg('Error loading task');
+        });
     })
     .error(function(){
       errorMsg('Error loading task list');
