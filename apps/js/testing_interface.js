@@ -304,6 +304,12 @@ $(document).ready(function () {
     $('input[type=radio][name=tool_switching]').change(function() {
         initializeSelectable();
     });
+    
+    $('input[type=text][name=size]').on('keydown', function(event) {
+        if (event.keyCode == 13) {
+            resizeOutputGrid();
+        }
+    });
 
     $('body').keydown(function(event) {
         // Copy and paste functionality.
