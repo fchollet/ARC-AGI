@@ -1,3 +1,7 @@
+# ML Club Spring Challenge: The ARC
+
+The following challenge comes from Kaggle's Abraction and Reasoning Corpus competition. Please work together (or individually) to develop a model that can answer these 'IQ-like' questions, then post your solution in the submissions folder. 
+
 # The Abstraction and Reasoning Corpus (ARC)
 
 This repository contains the ARC task data, as well as a browser-based interface for humans to try their hand at solving the tasks manually.
