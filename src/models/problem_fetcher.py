@@ -39,3 +39,14 @@ class ProblemFetcher:
         path = os.path.join(folder, filename)
         with open(path, 'r') as f:
             return json.loads(f.read())
+
+    def all_data_paths(self):
+        # data_path = Path('/kaggle/input/abstraction-and-reasoning-challenge/')
+        data_path = Path('/home/douglas/Documents/dev/ARC/data/')
+        training_path = data_path / 'training'
+        evaluation_path = data_path / 'evaluation'
+        # test_path = data_path / 'test'
+
+        training_tasks = sorted(os.listdir(training_path))
+        evaluation_tasks = sorted(os.listdir(evaluation_path))
+        return training_tasks, evaluation_tasks
