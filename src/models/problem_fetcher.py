@@ -12,10 +12,14 @@ from pathlib import Path
 
 class ProblemFetcher:
 
-    def __init__(self, evaluation_fdr=os.path.join(Path(__file__).parent.parent.parent, 'data', 'evaluation'),
-                 training_fdr=os.path.join(Path(__file__).parent.parent.parent,  'data', 'training')):
-        self.evaluation_folder = evaluation_fdr
-        self.training_folder = training_fdr
+    def __init__(self):
+        self.training_folder = None
+        self.test_folder = None
+        # kaggle path
+        # self.submission_path = Path('../input/abstraction-and-reasoning-challenge/')
+        # my local path
+        self.submission_path = Path('../data/')
+        self.set_all_data_paths()
 
     def get_specific_training_problem(self, filename):
         """
@@ -25,8 +29,8 @@ class ProblemFetcher:
         """
         return self._get_problem(self.training_folder, filename)
 
-    def get_specific_evaluation_problem(self, filename):
-        return self._get_problem(self.evaluation_folder, filename)
+    def get_specific_test_problem(self, filename):
+        return self._get_problem(self.test_folder, filename)
 
     def get_random_training(self):
         files = os.listdir(self.training_folder)
@@ -40,13 +44,13 @@ class ProblemFetcher:
         with open(path, 'r') as f:
             return json.loads(f.read())
 
-    def all_data_paths(self):
+    def set_all_data_paths(self):
         # data_path = Path('/kaggle/input/abstraction-and-reasoning-challenge/')
-        data_path = Path('/home/douglas/Documents/dev/ARC/data/')
-        training_path = data_path / 'training'
-        evaluation_path = data_path / 'evaluation'
-        # test_path = data_path / 'test'
+        data_path = self.submission_path
+        self.training_folder = data_path / 'training'
+        self.test_folder = data_path / 'test'
 
-        training_tasks = sorted(os.listdir(training_path))
-        evaluation_tasks = sorted(os.listdir(evaluation_path))
-        return training_tasks, evaluation_tasks
+    def get_all_data_file_names(self):
+        training_tasks = sorted(os.listdir(self.training_folder))
+        test_tasks = sorted(os.listdir(self.test_folder))
+        return training_tasks, test_tasks

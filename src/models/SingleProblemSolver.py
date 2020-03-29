@@ -49,7 +49,7 @@ class SingleProblemSolver:
         board_differences = []
         np_in = np.array(board_in, np.int32)
         np_out = np.array(board_out)
-        if np_in.shape != np_out.shape:
+        if np_in.shape[0] < np_out.shape[0] and np_in.shape[1] < np_out.shape[1]:
             # Shrink it to size of the object. Don't get fancy. later we will have to
             board_differences.append('shrink_to_object')
         return board_differences
@@ -110,24 +110,33 @@ class SingleProblemSolver:
         I.E.
         {'created': {color: 2, num_groups: 5}, 'destroyed': {num_groups}, 'not_modified': {color: 1, num_groups: 1}}
         """
-        potential_cause = {}
-
+        potential_cause = {
+            'created': {},
+            'destroyed': {},
+            'not_modified': {}
+        }
+        invalidated_keys = set()
         for change, groups in groups_changed.items():
             if len(groups) > 0:
                 # change is something like not_modified
-                if change not in potential_cause:
-                    potential_cause[change] = {}
-                if 'color' not in potential_cause[change]:
-                    potential_cause[change]['color'] = [groups[0].color]
-                for group in groups:
-                    if potential_cause[change]['color'] != group.color:
-                        del potential_cause[change]['color']
-                        break
-                if groups[0].color == in_metadata['most_common_color']:
-                    potential_cause[change]['color'].append('most_common_color')
-                elif groups[0].color == in_metadata['least_common_color']:
-                    potential_cause[change]['color'].append('least_common_color')
+                if 'color' not in invalidated_keys:
+                    potential_cause, invalidated_keys = self.determine_group_change_cause_color_helper(
+                        potential_cause, change, groups, invalidated_keys, in_metadata)
         return potential_cause
+
+    def determine_group_change_cause_color_helper(self, potential_cause, change, groups, invalidated_keys, in_metadata):
+        if 'color' not in potential_cause[change]:
+            potential_cause[change]['color'] = [groups[0].color]
+        for group in groups:
+            if potential_cause[change]['color'] != group.color:
+                invalidated_keys.add('color')
+                del potential_cause[change]['color']
+                return potential_cause, invalidated_keys
+        if groups[0].color == in_metadata['most_common_color']:
+            potential_cause[change]['color'].append('most_common_color')
+        elif groups[0].color == in_metadata['least_common_color']:
+            potential_cause[change]['color'].append('least_common_color')
+        return potential_cause, invalidated_keys
 
     def compare_group_change_causes(self, group_change_causes):
         """
@@ -211,7 +220,8 @@ class SingleProblemSolver:
             for group in groups_to_be_removed:
                 input_groups.remove_group(group)
 
-        if 'shrink_to_object' in final_board_differences:
+        if 'shrink_to_object' in final_board_differences and len(
+                input_groups.shape_groups + input_groups.color_groups) > 0:
             # go through each object find the values closest to the walls using bounding boxes and top left xy values
             # you could do this with numpy but this should be less algorithmic work
             new_top_left_x = 9999
@@ -232,9 +242,10 @@ class SingleProblemSolver:
             for group in input_groups.shape_groups + input_groups.color_groups:
                 group.top_left_x -= new_top_left_x
                 group.top_left_y -= new_top_left_y
-            output_grid = np.zeros((bottom_right_x + 1 - new_top_left_x, bottom_right_y + 1 - new_top_left_y))
+            output_grid = np.zeros((bottom_right_x + 1 - new_top_left_x, bottom_right_y + 1 - new_top_left_y),
+                                   dtype=np.int32)
         else:
-            output_grid = np.zeros(input_groups.problem.shape)
+            output_grid = np.zeros(input_groups.problem.shape, dtype=np.int32)
 
         for group in input_groups.shape_groups + input_groups.color_groups:
             output_grid[group.top_left_x: group.top_left_x + group.bounding_box_x_len + 1,

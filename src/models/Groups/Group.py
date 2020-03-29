@@ -29,7 +29,7 @@ class Group:
         # This way later the groups can be compared without their relative positioning mattering.
         # TODO Must find a way to represent this in such a way that the matrix can be rotated 90 degrees or mirrored
         # over an arbitrary value and for a useful comparison to be made
-        self.cells = np.zeros((1, 1))
+        self.cells = np.zeros((1, 1), dtype=np.int32)
         self.cells[0][0] = color
 
     def add_new_cell(self, x, y, color):
@@ -66,7 +66,7 @@ class Group:
             bounding_box_change = True
 
         if bounding_box_change:
-            new_cells = np.zeros((self.bounding_box_x_len + 1, self.bounding_box_y_len + 1))
+            new_cells = np.zeros((self.bounding_box_x_len + 1, self.bounding_box_y_len + 1), dtype=np.int32)
             new_cells[x_origin_change:len(self.cells) + x_origin_change,
                       y_origin_change:len(self.cells[0]) + y_origin_change] = self.cells
             self.cells = new_cells
