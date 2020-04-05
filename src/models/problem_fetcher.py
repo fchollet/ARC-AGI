@@ -12,13 +12,13 @@ from pathlib import Path
 
 class ProblemFetcher:
 
-    def __init__(self):
+    def __init__(self, data_path):
         self.training_folder = None
         self.test_folder = None
         # kaggle path
         # self.submission_path = Path('../input/abstraction-and-reasoning-challenge/')
         # my local path
-        self.submission_path = Path('../data/')
+        self.submission_path = Path(data_path)
         self.set_all_data_paths()
 
     def get_specific_training_problem(self, filename):

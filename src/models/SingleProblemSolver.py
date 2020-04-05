@@ -49,7 +49,7 @@ class SingleProblemSolver:
         board_differences = []
         np_in = np.array(board_in, np.int32)
         np_out = np.array(board_out)
-        if np_in.shape[0] < np_out.shape[0] and np_in.shape[1] < np_out.shape[1]:
+        if np_in.shape[0] > np_out.shape[0] and np_in.shape[1] > np_out.shape[1]:
             # Shrink it to size of the object. Don't get fancy. later we will have to
             board_differences.append('shrink_to_object')
         return board_differences

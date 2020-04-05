@@ -17,7 +17,8 @@ def flattener(pred):
 
 
 def main():
-    problem_fetcher = ProblemFetcher()
+    kaggle_path = '../input/abstraction-and-reasoning-challenge/'
+    problem_fetcher = ProblemFetcher('../data')
     training, test = problem_fetcher.get_all_data_file_names()
     test_predictions = []
     # problem_f_name = '0b148d64.json'
