@@ -16,7 +16,7 @@ class SingleProblemSolver:
                         We can assume that train has several elements in its list and that test only has one.
         """
         self.training = problem['train']
-        self.test = problem['test'][0]
+        self.test = problem['test']
 
     def solve(self):
         groups_changed_list = []
@@ -203,55 +203,57 @@ class SingleProblemSolver:
         }
         :return:
         """
-        input_groups = Grouper(self.test['input'])
+        outputs = []
+        for i in range(len(self.test)):
+            input_groups = Grouper(self.test[i]['input'])
 
-        if 'destroyed' in potential_changes:
-            groups_to_be_removed = []
-            if 'color' in potential_changes['destroyed']:
-                for value in potential_changes['destroyed']['color']:
-                    if isinstance(value, int):
-                        groups_to_be_removed += self.get_group_with_color(input_groups.color_groups, value)
-                    elif value == 'most_common_color':
-                        groups_to_be_removed += self.get_group_with_color(
-                            input_groups.color_groups, input_groups.metadata['most_common_color'])
-                    elif value == 'least_common_color':
-                        groups_to_be_removed += self.get_group_with_color(
-                            input_groups.color_groups, input_groups.metadata['most_common_color'])
-            for group in groups_to_be_removed:
-                input_groups.remove_group(group)
+            if 'destroyed' in potential_changes:
+                groups_to_be_removed = []
+                if 'color' in potential_changes['destroyed']:
+                    for value in potential_changes['destroyed']['color']:
+                        if isinstance(value, int):
+                            groups_to_be_removed += self.get_group_with_color(input_groups.color_groups, value)
+                        elif value == 'most_common_color':
+                            groups_to_be_removed += self.get_group_with_color(
+                                input_groups.color_groups, input_groups.metadata['most_common_color'])
+                        elif value == 'least_common_color':
+                            groups_to_be_removed += self.get_group_with_color(
+                                input_groups.color_groups, input_groups.metadata['most_common_color'])
+                for group in groups_to_be_removed:
+                    input_groups.remove_group(group)
 
-        if 'shrink_to_object' in final_board_differences and len(
-                input_groups.shape_groups + input_groups.color_groups) > 0:
-            # go through each object find the values closest to the walls using bounding boxes and top left xy values
-            # you could do this with numpy but this should be less algorithmic work
-            new_top_left_x = 9999
-            new_top_left_y = 9999
-            bottom_right_x = 0
-            bottom_right_y = 0
+            if 'shrink_to_object' in final_board_differences and len(
+                    input_groups.shape_groups + input_groups.color_groups) > 0:
+                # go through each object find the values closest to the walls using bounding boxes and top left xy values
+                # you could do this with numpy but this should be less algorithmic work
+                new_top_left_x = 9999
+                new_top_left_y = 9999
+                bottom_right_x = 0
+                bottom_right_y = 0
+                for group in input_groups.shape_groups + input_groups.color_groups:
+                    if new_top_left_x > group.top_left_x:
+                        new_top_left_x = group.top_left_x
+                    if new_top_left_y > group.top_left_y:
+                        new_top_left_y = group.top_left_y
+                    btm_rt_x = group.top_left_x + group.bounding_box_x_len
+                    btm_rt_y = group.top_left_y + group.bounding_box_y_len
+                    if bottom_right_x < btm_rt_x:
+                        bottom_right_x = btm_rt_x
+                    if bottom_right_y < btm_rt_y:
+                        bottom_right_y = btm_rt_y
+                for group in input_groups.shape_groups + input_groups.color_groups:
+                    group.top_left_x -= new_top_left_x
+                    group.top_left_y -= new_top_left_y
+                output_grid = np.zeros((bottom_right_x + 1 - new_top_left_x, bottom_right_y + 1 - new_top_left_y),
+                                       dtype=np.int32)
+            else:
+                output_grid = np.zeros(input_groups.problem.shape, dtype=np.int32)
+
             for group in input_groups.shape_groups + input_groups.color_groups:
-                if new_top_left_x > group.top_left_x:
-                    new_top_left_x = group.top_left_x
-                if new_top_left_y > group.top_left_y:
-                    new_top_left_y = group.top_left_y
-                btm_rt_x = group.top_left_x + group.bounding_box_x_len
-                btm_rt_y = group.top_left_y + group.bounding_box_y_len
-                if bottom_right_x < btm_rt_x:
-                    bottom_right_x = btm_rt_x
-                if bottom_right_y < btm_rt_y:
-                    bottom_right_y = btm_rt_y
-            for group in input_groups.shape_groups + input_groups.color_groups:
-                group.top_left_x -= new_top_left_x
-                group.top_left_y -= new_top_left_y
-            output_grid = np.zeros((bottom_right_x + 1 - new_top_left_x, bottom_right_y + 1 - new_top_left_y),
-                                   dtype=np.int32)
-        else:
-            output_grid = np.zeros(input_groups.problem.shape, dtype=np.int32)
-
-        for group in input_groups.shape_groups + input_groups.color_groups:
-            output_grid[group.top_left_x: group.top_left_x + group.bounding_box_x_len + 1,
-                        group.top_left_y: group.bounding_box_y_len + group.top_left_y + 1] = group.cells
-
-        return output_grid
+                output_grid[group.top_left_x: group.top_left_x + group.bounding_box_x_len + 1,
+                            group.top_left_y: group.bounding_box_y_len + group.top_left_y + 1] = group.cells
+            outputs.append(output_grid.tolist())
+        return outputs
 
     def get_group_with_color(self, input_groups, color):
         groups_w_color = []

@@ -1,3 +1,6 @@
+catboost
+xgboost
+scikit-learn
 numpy
 attrs==19.3.0
 Click==7.0
