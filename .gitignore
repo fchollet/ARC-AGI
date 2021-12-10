@@ -1,1 +1,10 @@
-__pycache__
+# Python
+__pycache__/
+.pytest_cache/
+
+# Editor and tools
+.vscode/
+.ipynb_checkpoints/
+
+# Build environment
+build/
