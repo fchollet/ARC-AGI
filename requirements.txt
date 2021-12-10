@@ -1,0 +1,5 @@
+asciitree==0.3.3
+matplotlib==3.4.3
+numpy==1.21.4
+# Numba isn't yet compatible with python3.10
+# numba==0.51.2

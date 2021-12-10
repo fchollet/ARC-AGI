@@ -1,0 +1,11 @@
+{
+    "shortcuts": [
+        {
+            "command": "runmenu:restart-and-run-all",
+            "keys": [
+                "Ctrl Shift K"
+            ],
+            "selector": "[data-jp-code-runner]"
+        }
+    ]
+}
