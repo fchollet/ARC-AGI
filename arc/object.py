@@ -20,7 +20,7 @@ class Object:
         bound: tuple[int, int] = None,
         name: str = "",
         reduced: str = "",
-        gens: list[Gen] = None,
+        gens: list[str] = None,
         children: list["Object"] = None,
         grid=None,
         pos=None,
@@ -54,10 +54,6 @@ class Object:
         if children:
             self.adopt()
 
-    # @property
-    # def loc(self) -> tuple[int, int]:
-    #     return (self.row, self.col)
-
     @property
     def seed(self) -> tuple[int, int, int]:
         """The *local* position and color information of the Object."""
@@ -73,15 +69,6 @@ class Object:
             self.col + self.parent.anchor[1],
             self.color if self.color != cst.NULL_COLOR else self.parent.color,
         )
-
-    @property
-    def head(self):
-        pass
-        # TODO eliminate?
-        # if self.color == cst.NULL_COLOR:
-        #     return self.loc
-        # else:
-        #     return self.seed
 
     @property
     def category(self) -> str:
@@ -328,7 +315,6 @@ class Object:
         # Or else we apply the gens to each child
         objs = self.children or [Object(*self.anchor)]
         # TODO gen refactor
-        log.debug(self.gens)
         for gen in self.gens:
             spawned = []
             for obj in objs:

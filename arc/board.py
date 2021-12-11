@@ -1,4 +1,4 @@
-from typing import TypeAlias
+from typing import Any, TypeAlias
 import asciitree
 import collections
 
@@ -6,7 +6,7 @@ from matplotlib.figure import Figure
 
 from arc.util import logger
 from arc.object import Object, find_closest
-from arc.processes import Processes as Pr
+from arc.processes import Process, MakeBase, ConnectObjects, SeparateColor
 from arc.viz import plot_grid
 
 log = logger.fancy_logger("Board", level=20)
@@ -28,9 +28,12 @@ class Board:
 
     """
 
-    def __init__(self, data: BoardData, name: str = ""):
+    def __init__(
+        self, data: BoardData, name: str = "", processes: list[Process] = None
+    ):
         self.name = name
         self.rep = Object(grid=data)
+        self.processes = processes or [MakeBase(), ConnectObjects(), SeparateColor()]
 
         # Used during reduction process
         self.proc_q = collections.deque([self.rep])
@@ -47,7 +50,7 @@ class Board:
             self._cplot = plot_grid(self.rep.grid)
         return self._cplot
 
-    def tree(self, obj=None, ind=0, level=10) -> None:
+    def tree(self, obj: Object, ind: int = 0, level: int = 10) -> None:
         """Log the Board as an hierarchy of named Objects."""
         # Quit early if we can't print the output
         if log.level > level:
@@ -59,11 +62,11 @@ class Board:
             header = f"{obj._id}({obj.props})"
         nodes = {header: self._walk_tree(obj)}
         output = asciitree.LeftAligned()(nodes).split("\n")
-        ind = "  " * ind
+        indent_str = "  " * ind
         for line in output:
-            log.info(f"{ind}{line}")
+            log.info(f"{indent_str}{line}")
 
-    def _walk_tree(self, base):
+    def _walk_tree(self, base: Object) -> dict[str, Any]:
         nodes = {}
         for kid in base.children:
             if kid.is_dot():
@@ -71,18 +74,25 @@ class Board:
             if kid.reduced:
                 header = f"[{kid.reduced}]({kid.props})"
             else:
-                header = f"{kid._name}({kid.props})"
+                header = f"{kid._id}({kid.props})"
             nodes[header] = self._walk_tree(kid)
         return nodes
 
+    # TODO Redo
     def inv(self, max_dots=10):
         return self.rep.inventory(max_dots=max_dots)
 
-    def reduce(self, batch=10, max_ct=10, source=None):
-        """Determine the optimal representation of the Board."""
+    def reduce(self, batch: int = 10, max_iter: int = 10, source=None) -> None:
+        """Determine the optimal representation of the Board.
+
+        Args:
+            batch: Number of candidates to keep each round. E.g. if batch=1, only the best
+              candidate is retained.
+            max_iter: Maximum number of iterations of reduction.
+        """
         self.inventory = source.inv() if source else []
         ct = 0
-        while ct < max_ct:
+        while ct < max_iter:
             ct += 1
             self.batch_reduction(batch=batch)
             log.debug(f"== Reduction at {self.rep.props}p after {ct} rounds")
@@ -93,7 +103,8 @@ class Board:
         self.rep = final.flatten()[0]
         self.rep.ppt("info")
 
-    def batch_reduction(self, batch=10):
+    def batch_reduction(self, batch: int = 10) -> None:
+        """Reduce the top 'batch' candidates."""
         ct = 0
         while self.proc_q and ct < batch:
             obj = self.proc_q.popleft()
@@ -106,7 +117,9 @@ class Board:
             log.debug(f" - Finished reduction for {obj}")
             ct += 1
 
-    def create_reduction(self, old_o, new_args, **kwargs):
+    def create_reduction(
+        self, old_o: Object, new_args: dict[str, Any], **kwargs
+    ) -> Object:
         # First generate any children of the main object
         children = []
         for kid_args in new_args.pop("children", []):
@@ -120,7 +133,7 @@ class Board:
         parent.occ = old_o.occ.copy()
         return parent
 
-    def _reduction(self, obj):
+    def _reduction(self, obj: Object) -> list[Object]:
         """Attempts to find a more canonical or condensed way to represent the object"""
         # No children means nothing to simplify
         if len(obj.children) == 0:
@@ -164,33 +177,23 @@ class Board:
             self.tree(res)
         return reviewed
 
-    def generate_candidates(self, obj):
+    def generate_candidates(self, obj: Object) -> list[Object]:
         obj.reduced = "Save"
-        kwargs = {}
         candidates = []
-
-        # Always try simplifying into a rectangle
-        log.debug("Setting a base layer")
-        candidates.append(Pr.make_base(obj, **kwargs))
-
-        # Try separating the children into clustered groups
-        log.debug("Connecting by color")
-        candidates.append(Pr.connect_objs(obj, **kwargs))
+        for process in self.processes:
+            if process.test(obj):
+                candidates.append(process.run(obj))
 
         # TODO This seems to be bugged based on number of args to CTile or RTile
         # Test for any form of (r, c) tiling, but only once during lifetime
         # if "Tile" not in obj.history:
         #     candidates.append(Pr.tiling(obj, **kwargs))
 
-        # Try separating by color
-        if len(obj.c_rank) > 1:
-            log.debug("Separating by color")
-            candidates.append(Pr.sep_color(obj, **kwargs))
         results = [self.create_reduction(obj, cand) for cand in candidates if cand]
         results.append(obj)
         return results
 
-    def check_candidates(self, obj, candidates):
+    def check_candidates(self, obj: Object, candidates: list[Object]) -> list[Object]:
         reviewed = []
         for cand in candidates:
             # Either check equality of absolute points, or subset

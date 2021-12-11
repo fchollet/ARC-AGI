@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal, TypeAlias
 import numpy as np
 
 # Compiling certain methods gives some speedup
@@ -9,9 +9,19 @@ from arc.definitions import Constants as cst
 
 log = logger.fancy_logger("BoardMethods", level=30)
 
+Position: TypeAlias = tuple[int, int]
+PositionList: TypeAlias = list[Position]
+Point: TypeAlias = tuple[int, int, int]
+PointList: TypeAlias = list[Point]
 
-def norm_pts(points):
-    """Used during Object init, ensures normalized seed"""
+
+def norm_pts(
+    points: PointList | PositionList,
+) -> tuple[Position, PointList | PositionList]:
+    """Calculate the seed (min row and col) of a list of points and norm them.
+
+    Returns the seed coordinates and the normalized points.
+    """
     minrow, mincol = cst.MAX_ROWS, cst.MAX_COLS
     for pt in points:
         minrow = min(minrow, pt[0])
@@ -26,6 +36,7 @@ def norm_pts(points):
     return (minrow, mincol), result
 
 
+# TODO Reconsider object use + modifying objects
 def norm_children(children):
     """Makes sure the parent/kid position relationship is normalized"""
     if not children:
@@ -40,9 +51,10 @@ def norm_children(children):
     return (minrow, mincol)
 
 
+# TODO Can this be made to eliminate the object dependence?
 def layer_pts(objects, bound=(cst.MAX_ROWS, cst.MAX_COLS)):
-    """Handles occlusion due to layering in objects
-    Startiwith the lowest layer, and assign points to a dictionary
+    """Handles occlusion due to layering in objects.
+    Start with the lowest layer and assign points to a dictionary
     in the form {(x, y): color}
     """
     pts = {}
@@ -55,21 +67,21 @@ def layer_pts(objects, bound=(cst.MAX_ROWS, cst.MAX_COLS)):
     return ordered
 
 
-def grid_filter(grid, colors):
-    colors = [colors] if isinstance(colors, int) else colors
-    results = []
-    for color in colors:
-        match_pts = list(zip(*np.where(grid == color)))
-        results.append({"color": color, "pos": match_pts})
+def grid_filter(grid: np.ndarray, color: int) -> tuple[PositionList, PointList]:
+    """Filter out a single color from a grid."""
+    match_pos: PositionList = []
+    other_pts: PointList = []
+    for row in range(grid.shape[0]):
+        for col in range(grid.shape[1]):
+            if (val := grid[row][col]) == color:
+                match_pos.append((row, col))
+            elif val != cst.NULL_COLOR:
+                other_pts.append((row, col, val))
+    return match_pos, other_pts
 
-    if len(colors) == 1:
-        mask = (grid != colors[0]) & (grid != cst.NULL_COLOR)
-        other_pts = list((*pt, grid[pt]) for pt in zip(*np.where(mask)))
-        results.append({"pts": other_pts})
-    return results
 
-
-def intersect(grids):
+def intersect(grids: list[np.ndarray]) -> np.ndarray:
+    """WIP"""
     base = grids[0].copy()
     for comp in grids[1:]:
         if base.shape != comp.shape:
@@ -79,7 +91,7 @@ def intersect(grids):
     return base
 
 
-def expand(grid, mult):
+def expand(grid: np.ndarray, mult: tuple[int, int]) -> np.ndarray:
     M, N = grid.shape
     out = np.full((M * mult[0], N * mult[1]), -1)
     for i in range(M):
@@ -90,6 +102,7 @@ def expand(grid, mult):
     return out
 
 
+# TODO Review
 def color_connect(marked, max_ct=10):
     """Try connecting groups of points based on colors
 
@@ -113,6 +126,7 @@ def color_connect(marked, max_ct=10):
     return blobs, False
 
 
+# TODO Review
 def get_blob(marked, start):
     M, N = marked.shape
     pts = [(*start, marked[start])]
@@ -135,12 +149,10 @@ def _eval_mesh(grid: np.ndarray, stride: int) -> tuple[int, float]:
     """Compiled subroutine to measure order in a strided grid"""
     R, C = grid.shape
     hits = 0
-    # cst.NULL_COLOR is hardcoded here
-    n_colors = 10 + 1
     for j in range(stride):
         active_mesh = grid[j::stride]
-        rebase = (active_mesh + (n_colors * np.arange(C))).ravel()
-        cts = np.bincount(rebase, minlength=n_colors * C).reshape(C, -1).T
+        rebase = (active_mesh + (cst.N_COLORS * np.arange(C))).ravel()
+        cts = np.bincount(rebase, minlength=cst.N_COLORS * C).reshape(C, -1).T
         for k in range(C):
             hits += np.max(cts[:, k])
     # We adjust the order measurement to unbias larger order params.

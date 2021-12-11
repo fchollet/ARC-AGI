@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, TypeAlias
 from matplotlib.figure import Figure
 
 import numpy as np
@@ -15,7 +15,7 @@ from arc.viz import plot_scenes
 
 log = logger.fancy_logger("Task", level=20)
 
-TaskData = dict[str, Any]
+TaskData: TypeAlias = dict[str, Any]
 
 
 class Task:
@@ -98,12 +98,12 @@ class Task:
         self.solve()
         self.test()
 
-    def reduce(self, batch: int = 10, max_ct: int = 10) -> None:
+    def reduce(self, batch: int = 10, max_iter: int = 10) -> None:
         """Apply reduction across all cases, learning context and iterating."""
         # TODO apply context
         for scene in self.cases:
-            log.info(f" ++ Reducing ({self.idx}, {scene.idx}) for {max_ct} rounds")
-            scene.reduce(batch=batch, max_ct=max_ct)
+            log.info(f" ++ Reducing ({self.idx}, {scene.idx}) for {max_iter} rounds")
+            scene.reduce(batch=batch, max_iter=max_iter)
             log.info(f"Scene PpP -> {scene.ppp:.3f}")
         log.info(f"Average PpP -> {self.ppp:.3f}")
 

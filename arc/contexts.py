@@ -18,16 +18,10 @@ class Context:
 class TaskContext(Context):
     def __init__(self):
         # noise tracks which colors pollute a tiling
-        self.noise = np.zeros(cst.NULL_COLOR + 1)
-        self.noise_colors = [cst.NULL_COLOR]
+        self.noise = np.zeros(cst.N_COLORS)
 
     def learn(self):
-        # Ignore already identified noise colors
-        for noise_color in self.noise_colors:
-            self.noise[noise_color] = 0
-        # Choose a color representing the most noise
-        # if np.max(self.noise) > 0:
-        #     self.noise_colors.append(np.argmax(self.noise))
+        pass
 
     def statics(self, scenes: list[Any]):
         common_in_px = intersect([item.input.raw for item in scenes])

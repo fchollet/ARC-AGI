@@ -1,8 +1,10 @@
 from typing import Any, TypeAlias
+
 from arc.util import logger
-from arc.contexts import SceneContext
-from arc.object import ObjectDelta, find_closest
 from arc.board import Board
+from arc.contexts import SceneContext
+from arc.definitions import Constants as cst
+from arc.object import ObjectDelta, find_closest
 
 log = logger.fancy_logger("Scene", level=30)
 
@@ -31,7 +33,7 @@ class Scene:
         self._dist = -1
 
     @property
-    def props(self):
+    def props(self) -> int:
         """Sum of total properties used to define the input and output boards."""
         return self.input.rep.props + self.output.rep.props
 
@@ -45,14 +47,15 @@ class Scene:
         """Transformational distance measured between input and output"""
         return self._dist
 
-    def reduce(self, batch: int = 10, max_ct: int = 10) -> None:
+    def reduce(self, batch: int = cst.BATCH, max_iter: int = cst.MAX_ITER) -> None:
         """Determine a compact representation of the input and output Boards."""
-        self.input.reduce(batch=batch, max_ct=max_ct)
+        self.input.reduce(batch=batch, max_iter=max_iter)
         log.info(f"Input reduction at {self.input.rep.props}")
         if self.output:
-            self.output.reduce(batch=batch, max_ct=max_ct, source=self.input)
+            self.output.reduce(batch=batch, max_iter=max_iter, source=self.input)
             log.info(f"Output reduction at {self.output.rep.props}")
 
+    # TODO Below needs review/updating
     def match(self):
         """Identify the minimal transformation set needed from input -> output Board."""
         self._dist, self.path = self.recreate(self.output.rep, self.input.inv())

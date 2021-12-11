@@ -1,41 +1,63 @@
+from typing import Any
 import numpy as np
 from arc.contexts import Context
+from abc import ABC, abstractmethod
 
 from arc.util import logger
 from arc.board_methods import color_connect, grid_filter
 from arc.definitions import Constants as cst
+from arc.object import Object
 
 log = logger.fancy_logger("Processes", level=30)
 
 
-class Processes:
-    @staticmethod
-    def sep_color(obj, scene=None, task=None):
-        """Improves representation by combining tiles of like colors"""
-        # Attempt with most prevalent color, unless scene has a suggestion
-        if hasattr(scene, "sep_color"):
-            # The contextual scene can set a priority
-            color = scene.sep_color
-        else:
-            color = obj.c_rank[0][0]
+class Process(ABC):
+    def test(self, obj: Object) -> bool:
+        """Check whether we believe we should run this process."""
+        return True
 
-        if len(obj.c_rank) == 2:
-            color2 = obj.c_rank[1][0]
-            obj1, obj2 = grid_filter(obj.grid, [color, color2])
-            obj2["name"] = f"Color|{cst.cname[color2]}"
-        else:
-            obj1, obj2 = grid_filter(obj.grid, [color])
-            obj2["name"] = f"Other"
-        obj1["name"] = f"Color|{cst.cname[color]}"
+    @abstractmethod
+    def run(self, obj: Object) -> Object:
+        pass
+
+    def info(self, obj: Object) -> None:
+        log.debug(f"Running {self.__class__.__name__} on {obj._id}")
+
+
+class SeparateColor(Process):
+    def __init__(self):
+        pass
+
+    def test(self, obj: Object) -> bool:
+        return len(obj.c_rank) > 1
+
+    def run(self, obj: Object) -> dict[str, Any]:
+        """Improves representation by combining points of like colors"""
+        self.info(obj)
+        # TODO Add in Context handling
+        color = obj.c_rank[0][0]
+
+        match_pos, other_pts = grid_filter(obj.grid, color)
+        oArgs1 = {"color": color, "pos": match_pos, "name": f"Color|{cst.cname[color]}"}
+        oArgs2 = {"pts": other_pts, "name": "Remainder|"}
+
         name = f"Split|{cst.cname[color]}"
-        parent = {"name": name, "reduced": "Split", "children": [obj1, obj2]}
+        parent = {"name": name, "reduced": "Split", "children": [oArgs1, oArgs2]}
         return parent
 
-    @staticmethod
-    def make_base(obj, context: Context = None):
+
+class MakeBase(Process):
+    def __init__(self):
+        pass
+
+    def test(self, obj: Object) -> bool:
+        return True
+
+    def run(self, obj: Object) -> dict[str, Any]:
         # Select a color to use, based on area covered by the color
         # TODO Add context interaction
         # color = getattr(context, "base_color", None)
+        self.info(obj)
         if 0 in [item[0] for item in obj.c_rank]:
             color = 0
         else:
@@ -47,20 +69,28 @@ class Processes:
         if rows > 1:
             gens.append(f"R{rows - 1}")
         if len(obj.c_rank) > 1:
-            obj1 = {"color": color, "gens": gens, "reduced": "Base"}
-            obj1["name"] = f"Rect({rows},{cols})|{cst.cname[color]}"
-            _, obj2 = grid_filter(obj.grid, [color])
-            obj2["name"] = "BaseRemainder"
+            oArgs1 = {"color": color, "gens": gens, "reduced": "Base"}
+            oArgs1["name"] = f"Rect({rows},{cols})|{cst.cname[color]}"
+            _, other_pts = grid_filter(obj.grid, color)
+            oArgs2 = {"pts": other_pts, "name": "BaseRemainder"}
             name = f"MakeBase|{cst.cname[color]}"
-            parent = dict(children=[obj1, obj2], name=name, reduced="Base")
+            parent = dict(children=[oArgs1, oArgs2], name=name, reduced="Base")
         else:
             name = f"Rect({rows},{cols})|{cst.cname[color]}"
             parent = dict(color=color, name=name, reduced="Base", gens=gens)
 
         return parent
 
-    @staticmethod
-    def connect_objs(obj, scene=None, task=None):
+
+class ConnectObjects(Process):
+    def __init__(self):
+        pass
+
+    def test(self, obj: Object) -> bool:
+        return True
+
+    def run(self, obj: Object) -> dict[str, Any] | None:
+        self.info(obj)
         marked = obj.grid.copy()
         off_colors = [cst.NULL_COLOR]
         for color in off_colors:
@@ -80,10 +110,13 @@ class Processes:
         }
         return parent
 
-    @staticmethod
-    def tiling(obj, scene=None, task=None):
+
+class Tiling(Process):
+    def __init__(self):
+        pass
+
+    def run(self, obj: Object) -> dict[str, Any] | None:
         R, C, _ = obj.order
-        n_colors = cst.NULL_COLOR + 1
         # If there's no tiling order, try making a base layer
         if R == 1 and C == 1:
             return None
@@ -95,19 +128,19 @@ class Processes:
             C = obj.grid.shape[1]
 
         # Track the points in the repeated block, also which colors cause noise
-        tile_pts, noise = [], np.zeros(cst.NULL_COLOR + 1)
+        tile_pts, noise = [], np.zeros(cst.N_COLORS)
         # For each i,j in the repeated block, figure out the most likely color
         for i in range(R):
             for j in range(C):
                 # Count how many times each color shows up in the sub-mesh
                 active_mesh = obj.grid[i::R, j::C]
-                cts = np.zeros(n_colors)
+                cts = np.zeros(cst.N_COLORS)
                 for row in active_mesh:
-                    cts += np.bincount(row, minlength=n_colors)
+                    cts += np.bincount(row, minlength=cst.N_COLORS)
                 # Eliminate colors from consideration based on context
-                if task and hasattr(task.context, "noise_colors"):
-                    for noise_color in task.context.noise_colors:
-                        cts[noise_color] = 0
+                # if task and hasattr(task.context, "noise_colors"):
+                #     for noise_color in task.context.noise_colors:
+                #         cts[noise_color] = 0
                 color = np.argmax(cts)
                 cts[color] = 0
                 noise += cts
@@ -124,6 +157,6 @@ class Processes:
             name=f"Tiling({R},{C})",
             reduced="Tile",
         )
-        if task:
-            task.context.noise += noise
+        # if task:
+        #     task.context.noise += noise
         return args

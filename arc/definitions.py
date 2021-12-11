@@ -1,20 +1,24 @@
 # A few scattered constants
 class Constants:
+    # Data loading
     N_TRAIN = 400
     FOLDER_TRAIN = "../data/training"
+
+    # Data specification
+    N_COLORS = 11
     NULL_COLOR = 10
     MARKED_COLOR = -1
-
     MAX_ROWS = 30
     MAX_COLS = 30
 
-    START_DIST = 10000
+    # Processing
+    MAX_DIST = 10000
+    BATCH = 10  # Number of reduction candidates to keep in a round
+    MAX_ITER = 10  # Maximum rounds of reduction
 
     STEPS_BASE = [(1, 0), (0, 1), (-1, 0), (0, -1)]
     STEPS_DIAG = [(1, 1), (-1, 1), (-1, -1), (1, -1)]
     ALL_STEPS = STEPS_BASE + STEPS_DIAG
-
-    CONTEXT_PREFIX = "_CTXT"
 
     cname = {
         -1: "Trans",

@@ -7,9 +7,9 @@ from typing import Any
 
 from matplotlib.figure import Figure
 
-from arc.util import logger
 from arc.definitions import Constants as cst
 from arc.task import Task
+from arc.util import logger
 
 log = logger.fancy_logger("ARC", level=20)
 
@@ -89,7 +89,7 @@ class ARC:
         """
         match arg:
             case int(level):
-                for logname in ["Task", "Scene", "Board", "Object"]:
+                for logname in ["Task", "Scene", "Board", "Object", "Processes"]:
                     logging.getLogger(logname).setLevel(level)
             case {**levels}:
                 for name, loglevel in levels.items():
