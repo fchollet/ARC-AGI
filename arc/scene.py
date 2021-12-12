@@ -1,14 +1,11 @@
-from typing import Any, TypeAlias
-
-from arc.util import logger
 from arc.board import Board
 from arc.contexts import SceneContext
 from arc.definitions import Constants as cst
 from arc.object import ObjectDelta, find_closest
+from arc.types import SceneData
+from arc.util import logger
 
 log = logger.fancy_logger("Scene", level=30)
-
-SceneData: TypeAlias = dict[str, Any]
 
 
 class Scene:
@@ -47,13 +44,13 @@ class Scene:
         """Transformational distance measured between input and output"""
         return self._dist
 
-    def reduce(self, batch: int = cst.BATCH, max_iter: int = cst.MAX_ITER) -> None:
+    def decompose(self, batch: int = cst.BATCH, max_iter: int = cst.MAX_ITER) -> None:
         """Determine a compact representation of the input and output Boards."""
-        self.input.reduce(batch=batch, max_iter=max_iter)
-        log.info(f"Input reduction at {self.input.rep.props}")
+        self.input.decompose(batch=batch, max_iter=max_iter)
+        log.info(f"Input decomposition at {self.input.rep.props}")
         if self.output:
-            self.output.reduce(batch=batch, max_iter=max_iter, source=self.input)
-            log.info(f"Output reduction at {self.output.rep.props}")
+            self.output.decompose(batch=batch, max_iter=max_iter, source=self.input)
+            log.info(f"Output decomposition at {self.output.rep.props}")
 
     # TODO Below needs review/updating
     def match(self):

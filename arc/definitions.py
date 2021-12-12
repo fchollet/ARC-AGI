@@ -1,8 +1,14 @@
-# A few scattered constants
+"""The set of global constants used in the codebase.
+
+Most of these shouldn't change, but some of them dictate how certain
+operations will perform (such as batch size during decomposition).
+"""
+
+
 class Constants:
     # Data loading
     N_TRAIN = 400
-    FOLDER_TRAIN = "../data/training"
+    FOLDER_TRAIN = "data/training"
 
     # Data specification
     N_COLORS = 11
@@ -13,8 +19,8 @@ class Constants:
 
     # Processing
     MAX_DIST = 10000
-    BATCH = 10  # Number of reduction candidates to keep in a round
-    MAX_ITER = 10  # Maximum rounds of reduction
+    BATCH = 10  # Number of decomposition candidates to keep in a round
+    MAX_ITER = 10  # Maximum rounds of decomposition
 
     STEPS_BASE = [(1, 0), (0, 1), (-1, 0), (0, -1)]
     STEPS_DIAG = [(1, 1), (-1, 1), (-1, -1), (1, -1)]

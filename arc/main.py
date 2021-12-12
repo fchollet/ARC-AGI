@@ -10,12 +10,17 @@ from matplotlib.figure import Figure
 from arc.definitions import Constants as cst
 from arc.task import Task
 from arc.util import logger
+from arc.util import profile
 
 log = logger.fancy_logger("ARC", level=20)
 
 
 class ARC:
     """Load and operate on a collection of Tasks.
+
+    This is the generic starting point for interacting with the ARC dataset and
+    the solution process contained in this codebase. It handles loading the data
+    and offering high-level control methods.
 
     Tasks are given an integer index based on the sorted input filenames.
 
@@ -115,6 +120,12 @@ class ARC:
             selection -= remove
         log.info(f"Selected {len(selection)} based on Selector: {selector}")
         return selection
+
+    @profile.profile(threshold=0.00)
+    def perf_tasks(self) -> None:
+        log.info(f"Profiling execution on {self.N} tasks")
+        for idx in self.selection:
+            self.tasks[idx].decompose()
 
     def solve_tasks(self, N: int = None) -> None:
         """TODO needs updating"""

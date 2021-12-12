@@ -1,4 +1,3 @@
-from typing import Any, TypeAlias
 from matplotlib.figure import Figure
 
 import numpy as np
@@ -11,11 +10,10 @@ from arc.scene import Scene
 from arc.selector import group_inputs, create_selectors, base_describe, describe, select
 from arc.object import Object
 from arc.transforms import const_map, t2t_map
+from arc.types import TaskData
 from arc.viz import plot_scenes
 
 log = logger.fancy_logger("Task", level=20)
-
-TaskData: TypeAlias = dict[str, Any]
 
 
 class Task:
@@ -93,17 +91,17 @@ class Task:
 
     def complete_run(self) -> None:
         """Execute every step of the solution pipeline for the Task."""
-        self.reduce()
+        self.decompose()
         self.match()
         self.solve()
         self.test()
 
-    def reduce(self, batch: int = 10, max_iter: int = 10) -> None:
-        """Apply reduction across all cases, learning context and iterating."""
+    def decompose(self, batch: int = cst.BATCH, max_iter: int = cst.MAX_ITER) -> None:
+        """Apply decomposition across all cases, learning context and iterating."""
         # TODO apply context
         for scene in self.cases:
             log.info(f" ++ Reducing ({self.idx}, {scene.idx}) for {max_iter} rounds")
-            scene.reduce(batch=batch, max_iter=max_iter)
+            scene.decompose(batch=batch, max_iter=max_iter)
             log.info(f"Scene PpP -> {scene.ppp:.3f}")
         log.info(f"Average PpP -> {self.ppp:.3f}")
 
@@ -152,7 +150,7 @@ class Task:
     def generate(self, test_case: int = 0):
         soln_input = self.tests[test_case].input
 
-        soln_input.reduce()
+        soln_input.decompose()
         output = self._generate_out(soln_input.rep, self.solution)
         return output
 

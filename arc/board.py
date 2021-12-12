@@ -1,4 +1,4 @@
-from typing import Any, TypeAlias
+from typing import Any
 import asciitree
 import collections
 
@@ -7,11 +7,10 @@ from matplotlib.figure import Figure
 from arc.util import logger
 from arc.object import Object, find_closest
 from arc.processes import Process, MakeBase, ConnectObjects, SeparateColor
+from arc.types import BoardData
 from arc.viz import plot_grid
 
 log = logger.fancy_logger("Board", level=20)
-
-BoardData: TypeAlias = list[list[int]]
 
 
 class Board:
@@ -23,8 +22,8 @@ class Board:
     Attributes:
         rep: The current representation of the Board via Objects.
         name: An auto-generated, descriptive name for the board.
-        proc_q: A priority queue for holding reduction candidates.
-        bank: Any reductions with no further possible operations.
+        proc_q: A priority queue for holding decomposition candidates.
+        bank: Any decompositions with no further possible operations.
 
     """
 
@@ -35,7 +34,7 @@ class Board:
         self.rep = Object(grid=data)
         self.processes = processes or [MakeBase(), ConnectObjects(), SeparateColor()]
 
-        # Used during reduction process
+        # Used during decomposition process
         self.proc_q = collections.deque([self.rep])
         self.bank = []
 
@@ -56,8 +55,8 @@ class Board:
         if log.level > level:
             return
         obj = obj or self.rep
-        if obj.reduced:
-            header = f"[{obj.reduced}]({obj.props})"
+        if obj.decomposed:
+            header = f"[{obj.decomposed}]({obj.props})"
         else:
             header = f"{obj._id}({obj.props})"
         nodes = {header: self._walk_tree(obj)}
@@ -71,8 +70,8 @@ class Board:
         for kid in base.children:
             if kid.is_dot():
                 return {}
-            if kid.reduced:
-                header = f"[{kid.reduced}]({kid.props})"
+            if kid.decomposed:
+                header = f"[{kid.decomposed}]({kid.props})"
             else:
                 header = f"{kid._id}({kid.props})"
             nodes[header] = self._walk_tree(kid)
@@ -82,42 +81,42 @@ class Board:
     def inv(self, max_dots=10):
         return self.rep.inventory(max_dots=max_dots)
 
-    def reduce(self, batch: int = 10, max_iter: int = 10, source=None) -> None:
+    def decompose(self, batch: int = 10, max_iter: int = 10, source=None) -> None:
         """Determine the optimal representation of the Board.
 
         Args:
             batch: Number of candidates to keep each round. E.g. if batch=1, only the best
               candidate is retained.
-            max_iter: Maximum number of iterations of reduction.
+            max_iter: Maximum number of iterations of decomposition.
         """
         self.inventory = source.inv() if source else []
         ct = 0
         while ct < max_iter:
             ct += 1
-            self.batch_reduction(batch=batch)
+            self.batch_decomposition(batch=batch)
             log.debug(f"== Reduction at {self.rep.props}p after {ct} rounds")
             if not self.proc_q:
-                log.debug("===Ending reduction due to empty processing queue")
+                log.debug("===Ending decomposition due to empty processing queue")
                 break
         final = sorted(self.bank + list(self.proc_q), key=lambda x: x.props)[0]
         self.rep = final.flatten()[0]
         self.rep.ppt("info")
 
-    def batch_reduction(self, batch: int = 10) -> None:
+    def batch_decomposition(self, batch: int = 10) -> None:
         """Reduce the top 'batch' candidates."""
         ct = 0
         while self.proc_q and ct < batch:
             obj = self.proc_q.popleft()
             self.tree(obj)
-            added = self._reduction(obj)
+            added = self._decomposition(obj)
             if not added:
                 self.bank.append(obj)
-                log.debug("  # All leaves reduced")
+                log.debug("  # All leaves decomposed")
             self.proc_q.extend(added)
-            log.debug(f" - Finished reduction for {obj}")
+            log.debug(f" - Finished decomposition")
             ct += 1
 
-    def create_reduction(
+    def create_decomposition(
         self, old_o: Object, new_args: dict[str, Any], **kwargs
     ) -> Object:
         # First generate any children of the main object
@@ -133,19 +132,19 @@ class Board:
         parent.occ = old_o.occ.copy()
         return parent
 
-    def _reduction(self, obj: Object) -> list[Object]:
+    def _decomposition(self, obj: Object) -> list[Object]:
         """Attempts to find a more canonical or condensed way to represent the object"""
         # No children means nothing to simplify
         if len(obj.children) == 0:
             return []
-        # Search for the first object that's not reduced and apply reduction
-        elif obj.reduced:
+        # Search for the first object that's not decomposed and apply decomposition
+        elif obj.decomposed:
             all_rev = []
             curr_occ = obj.occ.copy()
             for r_idx, child in enumerate(obj.children[::-1]):
                 idx = len(obj.children) - 1 - r_idx
                 child.occ = curr_occ.copy()
-                reviewed = self._reduction(child)
+                reviewed = self._decomposition(child)
                 if not reviewed:
                     curr_occ |= set([(pt[0], pt[1]) for pt in child.pts])
                     continue
@@ -157,7 +156,7 @@ class Board:
                 break
             return all_rev
 
-        # Begin reduction process:  check for existing context representations
+        # Begin decomposition process:  check for existing context representations
         if check := find_closest(obj, self.inventory, threshold=0.75):
             banked = check.right.spawn()
             # TODO We should figure out the right way to assign all this
@@ -165,7 +164,7 @@ class Board:
             banked.row = obj.row
             banked.col = obj.col
             banked.parent = obj.parent
-            banked.reduced = "Scene"
+            banked.decomposed = "Scene"
             return [banked]
 
         candidates = self.generate_candidates(obj)
@@ -178,7 +177,7 @@ class Board:
         return reviewed
 
     def generate_candidates(self, obj: Object) -> list[Object]:
-        obj.reduced = "Save"
+        obj.decomposed = "Save"
         candidates = []
         for process in self.processes:
             if process.test(obj):
@@ -189,7 +188,7 @@ class Board:
         # if "Tile" not in obj.history:
         #     candidates.append(Pr.tiling(obj, **kwargs))
 
-        results = [self.create_reduction(obj, cand) for cand in candidates if cand]
+        results = [self.create_decomposition(obj, cand) for cand in candidates if cand]
         results.append(obj)
         return results
 

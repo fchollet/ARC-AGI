@@ -21,7 +21,7 @@ class Process(ABC):
         pass
 
     def info(self, obj: Object) -> None:
-        log.debug(f"Running {self.__class__.__name__} on {obj._id}")
+        log.debug(f"Running {self.__class__.__name__}")
 
 
 class SeparateColor(Process):
@@ -42,7 +42,7 @@ class SeparateColor(Process):
         oArgs2 = {"pts": other_pts, "name": "Remainder|"}
 
         name = f"Split|{cst.cname[color]}"
-        parent = {"name": name, "reduced": "Split", "children": [oArgs1, oArgs2]}
+        parent = {"name": name, "decomposed": "Split", "children": [oArgs1, oArgs2]}
         return parent
 
 
@@ -69,15 +69,15 @@ class MakeBase(Process):
         if rows > 1:
             gens.append(f"R{rows - 1}")
         if len(obj.c_rank) > 1:
-            oArgs1 = {"color": color, "gens": gens, "reduced": "Base"}
+            oArgs1 = {"color": color, "gens": gens, "decomposed": "Base"}
             oArgs1["name"] = f"Rect({rows},{cols})|{cst.cname[color]}"
             _, other_pts = grid_filter(obj.grid, color)
             oArgs2 = {"pts": other_pts, "name": "BaseRemainder"}
             name = f"MakeBase|{cst.cname[color]}"
-            parent = dict(children=[oArgs1, oArgs2], name=name, reduced="Base")
+            parent = dict(children=[oArgs1, oArgs2], name=name, decomposed="Base")
         else:
             name = f"Rect({rows},{cols})|{cst.cname[color]}"
-            parent = dict(color=color, name=name, reduced="Base", gens=gens)
+            parent = dict(color=color, name=name, decomposed="Base", gens=gens)
 
         return parent
 
@@ -106,7 +106,7 @@ class ConnectObjects(Process):
         parent = {
             "children": children,
             "name": f"Cnxn{len(children)}",
-            "reduced": "Conn",
+            "decomposed": "Conn",
         }
         return parent
 
@@ -155,7 +155,7 @@ class Tiling(Process):
             children=[dict(pts=tile_pts, name=f"TBlock({R},{C})")],
             bound=bound,
             name=f"Tiling({R},{C})",
-            reduced="Tile",
+            decomposed="Tile",
         )
         # if task:
         #     task.context.noise += noise

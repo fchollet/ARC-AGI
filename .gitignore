@@ -8,3 +8,6 @@ __pycache__/
 
 # Build environment
 build/
+
+# Profiling
+*.prof

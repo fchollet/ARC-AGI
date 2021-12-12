@@ -19,7 +19,7 @@ class Object:
         parent: "Object" = None,
         bound: tuple[int, int] = None,
         name: str = "",
-        reduced: str = "",
+        decomposed: str = "",
         gens: list[str] = None,
         children: list["Object"] = None,
         grid=None,
@@ -35,8 +35,8 @@ class Object:
         self.children = children or []
         self.name = name
 
-        # Used during reduction process
-        self.reduced = reduced
+        # Used during decomposition process
+        self.decomposed = decomposed
         self.occ = set([])
 
         # Used during selection process
@@ -117,7 +117,7 @@ class Object:
             shape = ""
         else:
             shape = f"({self.shape[0]}x{self.shape[1]})"
-        link = "*" if self.reduced == "Scene" else ""
+        link = "*" if self.decomposed == "Scene" else ""
         return f"{link}{self.category}{shape}@{self.anchor}"
 
     def __repr__(self):
@@ -174,7 +174,7 @@ class Object:
         if self.is_dot():
             # A dot will never have kwargs
             return Object(*(args + self.seed[len(args) :]))
-        base_args = ["row", "col", "color", "parent", "bound", "name", "reduced"]
+        base_args = ["row", "col", "color", "parent", "bound", "name", "decomposed"]
         new_args = {arg: getattr(self, arg) for arg in base_args}
         for key, val in zip(base_args, args):
             new_args[key] = val
@@ -202,7 +202,7 @@ class Object:
 
     @property
     def history(self):
-        result = [self.reduced] if self.reduced else []
+        result = [self.decomposed] if self.decomposed else []
         if self.parent:
             result = self.parent.history + result
         return result
@@ -219,7 +219,7 @@ class Object:
         self.reset()
 
     def flatten(self):
-        """Returns an object optimized by reducing unnecessary levels"""
+        """Returns an object optimized by removing unnecessary levels"""
         # Having generators or not having children is a dead end
         if self.gens or not self.children or self.category == "Cluster":
             return [self]
@@ -346,7 +346,7 @@ class Object:
         if self._props is not None:
             return self._props
         # When we have a contextual reference, we already "know" the object
-        if self.reduced == "Scene":
+        if self.decomposed == "Scene":
             self._props = 1
             return self._props
 

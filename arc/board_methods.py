@@ -63,6 +63,7 @@ def layer_pts(objects, bound=(cst.MAX_ROWS, cst.MAX_COLS)):
         for pt in obj.pts:
             if pt[0] < maxrow and pt[1] < maxcol:
                 pts[(pt[0], pt[1])] = pt[2]
+    # print(f"{len(pts)} pts")
     ordered = sorted([(*pos, color) for pos, color in pts.items()])
     return ordered
 
