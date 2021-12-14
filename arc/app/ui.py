@@ -1,59 +1,55 @@
-from typing import Any, Optional
-
 import streamlit as st
 
 from arc.main import ARC
-from arc.app.explorer import explorer, single
-from arc.app.util import timed
+from arc.app.explorer import explorer
+from arc.app.solver import solver
 from arc.app.settings import Settings
 
 
-class UI:
-    def __init__(self) -> None:
-        if "idx" not in st.session_state:
-            st.session_state.idx = None
+def run_ui() -> None:
+    """Central UI logic governing components to display."""
+    init_session()
+    mode_selector()
+    task_selector()
 
-        N = menu()
-
-        _arc = init(N)
-
-        selector(_arc)
-
-        if st.session_state.idx is not None:
-            single(task_idx=st.session_state.idx)
-        else:
-            explorer()
+    if st.session_state.task_idx > 0:
+        solver(task_idx=st.session_state.task_idx)
+    else:
+        explorer()
 
 
-def menu() -> int:
+def init_session() -> None:
+    if "arc" not in st.session_state:
+        st.session_state.arc = None
+
+
+def mode_selector() -> None:
     # st.title("Exploring and Solving the ARC challenge")
 
-    blacklist = [8, 16, 28, 54, 60, 69, 73]  # Involves larger, tiled boards
-    mode_options = ["Explore", "Demo", "Stats", "Dev"]
-    mode = st.sidebar.selectbox("Select a mode", mode_options, index=3)
+    options = ["Demo", "Dev", "Stats"]
+    st.sidebar.selectbox("Select a mode", options, key="mode", index=1)
 
-    if mode == "Stats":
+    if st.session_state.mode == "Stats":
         N = 400
-    elif mode == "Dev":
-        N = 48
+    elif st.session_state.mode == "Dev":
+        N = 40
     else:
-        N = 10
-    return N
+        N = 2
+
+    st.write(f"Loading ARC dataset ({N} tasks)")
+    st.session_state.arc = ARC(N=N, folder=Settings.folder)
 
 
-def selector(_arc: ARC) -> None:
+def task_selector() -> None:
+    if st.session_state.arc is None:
+        st.write("No ARC dataset loaded")
+        return
     title = "Choose a task"
-    options = ["None"] + [str(i) for i in _arc.tasks]
-    index = 0 if st.session_state.idx is None else st.session_state.idx + 1
-    task_idx = st.sidebar.selectbox(title, options, index=index)
-    if task_idx == "None":
-        st.session_state.idx = None
-    else:
-        st.session_state.idx = int(task_idx)
+    options = [0] + list(st.session_state.arc.selection)
 
+    def labeler(option: int) -> str:
+        if option == 0:
+            return "Explore"
+        return str(option)
 
-def init(N: int):
-    if "arc" not in st.session_state or st.session_state.arc.N != N:
-        st.write(f"Loading ARC dataset ({N} tasks)")
-        st.session_state.arc = ARC(N=N, folder=Settings.folder)
-    return st.session_state.arc
+    st.sidebar.selectbox(title, options, index=0, format_func=labeler, key="task_idx")

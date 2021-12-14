@@ -10,7 +10,6 @@ from matplotlib.figure import Figure
 from arc.definitions import Constants as cst
 from arc.task import Task
 from arc.util import logger
-from arc.util import profile
 
 log = logger.fancy_logger("ARC", level=20)
 
@@ -37,7 +36,7 @@ class ARC:
         folder: str = cst.FOLDER_TRAIN,
     ):
         if not idxs:
-            idxs = set(range(N))
+            idxs = set(range(1, N + 1))
         self.N: int = len(idxs)
         self.selection: set[int] = idxs
 
@@ -73,7 +72,7 @@ class ARC:
 
         Supplying 'idxs' will load specific tasks, while 'N' will load the first 'N'.
         """
-        curr_idx, boards, tests = 0, 0, 0
+        curr_idx, boards, tests = 1, 0, 0
         for filename in sorted(glob.glob(f"{folder}/*.json")):
             if curr_idx in idxs:
                 with open(filename, "r") as fh:
@@ -103,7 +102,7 @@ class ARC:
     def select(self, selector: set[str] = None, selection: set[int] = None) -> None:
         """Choose which tasks will be active, by direct selection or by a set of traits."""
         if selector is None and selection is None:
-            self.selection = set(range(self.N))
+            self.selection = set(self.tasks.keys())
         if selection is not None:
             self.selection = set(sorted(selection))
         if selector is not None:
@@ -120,12 +119,6 @@ class ARC:
             selection -= remove
         log.info(f"Selected {len(selection)} based on Selector: {selector}")
         return selection
-
-    @profile.profile(threshold=0.00)
-    def perf_tasks(self) -> None:
-        log.info(f"Profiling execution on {self.N} tasks")
-        for idx in self.selection:
-            self.tasks[idx].decompose()
 
     def solve_tasks(self, N: int = None) -> None:
         """TODO needs updating"""

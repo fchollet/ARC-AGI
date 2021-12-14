@@ -1,4 +1,5 @@
 from functools import cached_property
+from typing import Any, Callable, TypeAlias
 
 import numpy as np
 
@@ -59,7 +60,7 @@ class Object:
         """The *local* position and color information of the Object."""
         return (self.row, self.col, self.color)
 
-    @property
+    @cached_property
     def anchor(self) -> tuple[int, int, int]:
         """The *global* position and color information of the Object."""
         if self.parent is None:
@@ -70,13 +71,13 @@ class Object:
             self.color if self.color != cst.NULL_COLOR else self.parent.color,
         )
 
-    @property
+    @cached_property
     def category(self) -> str:
         """A single-word description of the Object."""
-        if self.is_dot():
-            return "Dot"
-        elif not self.children:
-            if len(self.gens) == 1:
+        if not self.children:
+            if not self.gens:
+                return "Dot"
+            elif len(self.gens) == 1:
                 return "Line"
             elif len(self.gens) == 2:
                 return "Rect"
@@ -85,15 +86,15 @@ class Object:
         else:
             if len(self.gens) > 0:
                 return "Tile"
-            elif all([kid.is_dot() for kid in self.children]):
+            elif all([kid.category == "Dot" for kid in self.children]):
                 return "Cluster"
             else:
-                return "Obj"
+                return "Container"
 
     @cached_property
     def shape(self) -> tuple[int, int]:
         """The bounding dimensions of the Object."""
-        if self.is_dot():
+        if self.category == "Dot":
             return (1, 1)
         maxrow = max([pt[0] for pt in self.pos])
         maxcol = max([pt[1] for pt in self.pos])
@@ -107,29 +108,29 @@ class Object:
         return (row, col)
 
     @property
-    def size(self):
+    def size(self) -> int:
         return len(self.pts)
 
     @property
-    def _id(self):
+    def _id(self) -> str:
         """A concise, (nearly) unique description of the Object."""
-        if self.is_dot():
+        if self.category == "Dot":
             shape = ""
         else:
             shape = f"({self.shape[0]}x{self.shape[1]})"
         link = "*" if self.decomposed == "Scene" else ""
         return f"{link}{self.category}{shape}@{self.anchor}"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """One line description of what the object is"""
-        if self.is_dot():
+        if self.category == "Dot":
             info = ""
         else:
             info = f"({len(self.children)}ch, {self.size}pts, {self.props}p)"
         header = f"{self._id}{info}"
         return header
 
-    def info(self, tab=0, cond=10):
+    def info(self, tab=0, cond=10) -> str:
         """Detailed info on object and its children"""
         ind = "  " * tab
         output = [ind + self.__repr__()]
@@ -142,7 +143,8 @@ class Object:
             output = output[:cond] + ["..."]
         return "\n".join(output)
 
-    def ppt(self, level="info"):
+    # TODO Redo printing of information to be more coherent with other methods
+    def ppt(self, level="info") -> None:
         for line in self.info().split("\n"):
             getattr(log, level)(line)
 
@@ -163,15 +165,11 @@ class Object:
         else:
             return False
 
-    # def __sub__(self, other: "Object") -> "ObjectDelta":
-    #     """Object differences are handled separately."""
-    #     return ObjectDelta(self, other)
-
     def __getitem__(self, key: int) -> "Object":
         return self.children[key]
 
-    def spawn(self, *args, **kwargs):
-        if self.is_dot():
+    def spawn(self, *args, **kwargs) -> "Object":
+        if self.category == "Dot":
             # A dot will never have kwargs
             return Object(*(args + self.seed[len(args) :]))
         base_args = ["row", "col", "color", "parent", "bound", "name", "decomposed"]
@@ -200,6 +198,7 @@ class Object:
         for child in self.children:
             child.reset()
 
+    # TODO Redo in top-down fashion, at Board-level
     @property
     def history(self):
         result = [self.decomposed] if self.decomposed else []
@@ -218,10 +217,17 @@ class Object:
             child.parent = self
         self.reset()
 
-    def flatten(self):
-        """Returns an object optimized by removing unnecessary levels"""
-        # Having generators or not having children is a dead end
-        if self.gens or not self.children or self.category == "Cluster":
+    def flatten(self) -> list["Object"]:
+        """Eliminate unnecessary hierchical levels in Object representation.
+
+        Recursively move through the representation and identify any Objects
+        that could be "up-leveled". An example of upleveling would be when a
+        series of "connect on common color" operations yield 3+ clusters of
+        points. These might start on different levels of the hierarchy, but
+        could be all placed on the same level.
+        """
+        # Containers have no generators, and have some non-Dot children
+        if self.category != "Container":
             return [self]
         new_children = []
         for kid in self.children:
@@ -241,29 +247,26 @@ class Object:
         self.row, self.col, self.color = self.anchor
         self.parent = None
 
-    def is_dot(self):
-        return not self.children and not self.gens
-
-    def issubset(self, other):
+    def issubset(self, other: "Object") -> bool:
         return set(self.pts).issubset(other.pts)
 
-    def sim(self, other):
+    def sim(self, other: "Object") -> bool:
         """Tests if objects are same up to translation"""
         if not self.shape == other.shape:
             return False
         return (self.grid == other.grid).all()
 
-    def sil(self, other):
+    def sil(self, other: "Object") -> bool:
         """Tests if objects have the same 'outline', i.e. ignore color"""
-        shape_match = self.shape == other.shape
-        local_pos_match = self.pos == other.pos
-        return shape_match and local_pos_match
+        if not self.shape == other.shape:
+            return False
+        return self.pos == other.pos
 
-    def overlap(self, other):
+    def overlap(self, other: "Object") -> tuple[float, float]:
         ct = np.sum(self.grid == other.grid)
         return ct / self.grid.size, ct
 
-    def _grid2dots(self, grid):
+    def _grid2dots(self, grid: np.ndarray) -> None:
         """If we defined the object via a grid, this will supply the Dot children"""
         self._grid = np.array(grid, dtype=int)
         self.children = []
@@ -289,7 +292,7 @@ class Object:
         """2D grid, inheriting color but not position"""
         if self._grid is not None:
             return self._grid
-        if self.is_dot():
+        if self.category == "Dot":
             self._grid = np.array([[self.pts[0][2]]], dtype=int)
             return self._grid
         self._grid = np.full(self.shape, cst.NULL_COLOR, dtype=int)
@@ -307,7 +310,7 @@ class Object:
         """All points in the absolute coordinates and color"""
         if self._pts is not None:
             return self._pts
-        if self.is_dot():
+        if self.category == "Dot":
             self._pts = [self.anchor]
             return self._pts
 
@@ -334,7 +337,7 @@ class Object:
         """Contains list of coordinates relative to the object anchor point"""
         if self._pos is not None:
             return self._pos
-        if self.is_dot():
+        if self.category == "Dot":
             self._pos = [(0, 0)]
             return self._pos
         a_row, a_col, _ = self.anchor
@@ -342,7 +345,14 @@ class Object:
         return self._pos
 
     @property
-    def props(self):
+    def props(self) -> int:
+        """Count how many properties are used in this Object representation.
+
+        This is a core piece of information used to determine the "value" of
+        a representation--the more compact the better. There is some leeway
+        in this definition, which might be a central point of consideration
+        for achieving success in applications.
+        """
         if self._props is not None:
             return self._props
         # When we have a contextual reference, we already "know" the object
@@ -355,7 +365,7 @@ class Object:
         own_props = from_pos + int(self.color != cst.NULL_COLOR)
         self._props = 1 + own_props
 
-        if self.is_dot():
+        if self.category == "Dot":
             return self._props
 
         # Add up total actions on gens?
@@ -380,10 +390,10 @@ class Object:
         return self._c_rank
 
     @property
-    def order(self):
+    def order(self) -> tuple[int, int, float]:
         if self._order is not None:
             return self._order
-        if self.is_dot():
+        if self.category == "Dot":
             self._order = (1, 1, 1)
             return self._order
         # Get the most-ordered stride for each axis
@@ -395,7 +405,7 @@ class Object:
         return self._order
 
     def inventory(self, leaf_only=False, depth=0, max_dots=10):
-        if self.is_dot():
+        if self.category == "Dot":
             return [self]
         elif self.category == "Cluster":
             # If we have a cluster, only accept child dots if there aren't many
@@ -412,19 +422,30 @@ class Object:
         return res
 
 
+ObjectComparison: TypeAlias = Callable[[Object, Object], tuple[int, dict[str, Any]]]
+
+
 class ObjectDelta:
-    def __init__(self, obj1, obj2):
-        self.dist = 0
-        self.transform = {}
+    """Determine the 'difference' between two objects.
+
+    This class analyzes how many transformations and properties it requires to
+    turn the 'left' object into the 'right'. It calculates an integer measure called
+    'distance', as well as the series of standard transformations to apply.
+    """
+
+    def __init__(self, obj1: Object, obj2: Object, comparisons: list[ObjectComparison]):
+        self.dist = cst.MAX_DIST
         self.left = obj1
         self.right = obj2
+        self.transform = {}
         if obj1 == obj2:
+            self.dist = 0
             return
-        self.get_translation(obj1, obj2)
-        self.get_color_diff(obj1, obj2)
-        self.get_order_diff(obj1, obj2)
-        if not self.transform:
-            self.dist = 1000
+
+        for comparison in comparisons:
+            dist, trans = comparison(self.left, self.right)
+            self.dist += dist
+            self.transform.update(trans)
 
     @property
     def _name(self):
@@ -434,12 +455,13 @@ class ObjectDelta:
             trans += f"{item}"
         return header + f"[{trans}]"
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f"{self._name}: {self.right._id} -> {self.left._id}"
 
-    def __lt__(self, other):
+    def __lt__(self, other: "ObjectDelta") -> bool:
         return self.dist < other.dist
 
+    # TODO Does this make sense?
     def __sub__(self, other):
         """Returns a distance between transforms, used for selection grouping"""
         # First is the distance between base objects (uses ObjectDelta)
@@ -449,80 +471,3 @@ class ObjectDelta:
         d_xor = dictutil.dict_xor(self.transform, other.transform)
         dist += len(d_xor)
         return dist
-
-    def get_order_diff(self, obj1, obj2):
-        """Checks for differences in the arrangement of points"""
-        if obj1.sil(obj2):
-            return
-        o1o = obj1.order
-        o2o = obj2.order
-        # Without a matching silhouette, only an ordered transformation works here
-        # NOTE Including flooding and similar ops will change this
-        if o1o[2] != 1 or o2o[2] != 1:
-            self.dist = 1000
-        else:
-            # There could exist one or more generators to create the other object
-            for axis, code in [(0, "R"), (1, "C")]:
-                if obj1.shape[axis] != obj2.shape[axis]:
-                    ct = obj1.shape[axis]
-                    # ct = max(obj1.shape[axis] // obj2.shape[axis],
-                    #          obj2.shape[axis] // obj1.shape[axis])
-                    scaler = "f" if code == "R" else "p"
-                    self.transform[scaler] = ct - 1
-                    self.dist += 1
-
-    def get_color_diff(self, obj1, obj2):
-        c1 = set([item[0] for item in obj1.c_rank])
-        c2 = set([item[0] for item in obj2.c_rank])
-        if c1 != c2:
-            # Color remapping is a basic transform
-            if len(c1) == 1 and len(c2) == 1:
-                self.transform["c"] = list(c1)[0]
-                self.dist += 1
-            # However, partial or multiple remapping is not
-            else:
-                self.dist = 1000
-
-    def get_translation(self, obj1, obj2):
-        r1, c1, _ = obj1.anchor
-        r2, c2, _ = obj2.anchor
-        # NOTE Consider using center vs corner for this measure
-        if r1 == r2 and c1 == c2:
-            return
-        # Check for zeroing, which is special
-        if r1 == 0 and c1 == 0:
-            self.dist += 0.25
-            self.transform["z"] = 0
-            return
-        if r2 != r1:
-            # Justifying a single dimension is also special
-            if r1 == 0:
-                self.dist += 0.5
-                self.transform["j"] = 0
-            else:
-                self.dist += 1
-                self.transform["w"] = r1 - r2
-        if c2 != c1:
-            if c1 == 0:
-                self.dist += 0.5
-                self.transform["j"] = 1
-            else:
-                self.dist += 1
-                self.transform["s"] = c1 - c2
-
-
-def find_closest(
-    obj: Object, inventory: list[Object], threshold: float = None
-) -> ObjectDelta | None:
-    if not inventory:
-        return None
-    match = ObjectDelta(obj, inventory[0])
-    for source in inventory[1:]:
-        delta = ObjectDelta(obj, source)
-        if delta.dist < match.dist:
-            match = delta
-    if threshold is not None and match.dist > threshold:
-        log.debug(f"{obj} No matches meeting threshold (best {match.dist})")
-        return None
-    log.info(f"{obj} Match! Distance: {match.dist}")
-    return match

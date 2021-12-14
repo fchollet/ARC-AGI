@@ -5,11 +5,11 @@ from arc import ARC
 
 @pytest.fixture(scope="module")
 def decomposition_samples() -> ARC:
-    return ARC(idxs={7, 9, 15, 29})
+    return ARC(idxs={8, 10, 16, 30})
 
 
-def test_7(decomposition_samples: ARC):
-    board = decomposition_samples.tasks[7].cases[0].input
+def test_8(decomposition_samples: ARC):
+    board = decomposition_samples.tasks[8].cases[0].input
     board.decompose()
     child_names = sorted([kid._id for kid in board.rep.children])
     assert child_names == [
@@ -19,8 +19,8 @@ def test_7(decomposition_samples: ARC):
     ]
 
 
-def test_9(decomposition_samples: ARC):
-    board = decomposition_samples.tasks[9].cases[0].input
+def test_10(decomposition_samples: ARC):
+    board = decomposition_samples.tasks[10].cases[0].input
     board.decompose()
     child_names = sorted([kid._id for kid in board.rep.children])
     assert child_names == [
@@ -32,8 +32,8 @@ def test_9(decomposition_samples: ARC):
     ]
 
 
-def test_15(decomposition_samples: ARC):
-    board = decomposition_samples.tasks[15].cases[0].input
+def test_16(decomposition_samples: ARC):
+    board = decomposition_samples.tasks[16].cases[0].input
     board.decompose()
     child_names = sorted([kid._id for kid in board.rep.children])
     assert child_names == [
@@ -43,8 +43,8 @@ def test_15(decomposition_samples: ARC):
     ]
 
 
-def test_29(decomposition_samples: ARC):
-    board = decomposition_samples.tasks[29].cases[0].input
+def test_30(decomposition_samples: ARC):
+    board = decomposition_samples.tasks[30].cases[0].input
     board.decompose()
     child_names = sorted([kid._id for kid in board.rep.children])
     assert child_names == [

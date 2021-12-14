@@ -1,7 +1,7 @@
 import streamlit as st
 
-from arc.app.ui import UI
+from arc.app.ui import run_ui
 
 st.set_page_config(layout="wide")
 
-ui = UI()
+run_ui()

@@ -1,7 +1,7 @@
-from arc.board import Board
+from arc.board import Board, find_closest
 from arc.contexts import SceneContext
 from arc.definitions import Constants as cst
-from arc.object import ObjectDelta, find_closest
+from arc.object import ObjectDelta
 from arc.types import SceneData
 from arc.util import logger
 
@@ -59,7 +59,7 @@ class Scene:
         log.info(f"Minimal distance transformation ({self.dist}):")
         for delta in self.path:
             obj1, obj2, trans = delta.right, delta.left, delta.transform
-            log.info(f"Tr {trans} | {obj1._name} -> {obj2._name}")
+            log.info(f"Tr {trans} | {obj1._id} -> {obj2._id}")
 
     def recreate(self, obj, inventory) -> tuple[int, list[ObjectDelta]]:
         """Recursively tries to most easily create the given object"""

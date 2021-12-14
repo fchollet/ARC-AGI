@@ -3,9 +3,10 @@ import asciitree
 import collections
 
 from matplotlib.figure import Figure
+from arc.comparisons import get_color_diff, get_order_diff, get_translation
 
 from arc.util import logger
-from arc.object import Object, find_closest
+from arc.object import Object, ObjectDelta
 from arc.processes import Process, MakeBase, ConnectObjects, SeparateColor
 from arc.types import BoardData
 from arc.viz import plot_grid
@@ -68,7 +69,7 @@ class Board:
     def _walk_tree(self, base: Object) -> dict[str, Any]:
         nodes = {}
         for kid in base.children:
-            if kid.is_dot():
+            if kid.category == "Dot":
                 return {}
             if kid.decomposed:
                 header = f"[{kid.decomposed}]({kid.props})"
@@ -210,3 +211,23 @@ class Board:
                 reviewed.append(cand)
 
         return sorted(reviewed, key=lambda x: x.props)
+
+
+default_comparisons = [get_order_diff, get_color_diff, get_translation]
+
+
+def find_closest(
+    obj: Object, inventory: list[Object], threshold: float = None
+) -> ObjectDelta | None:
+    if not inventory:
+        return None
+    match = ObjectDelta(obj, inventory[0], comparisons=default_comparisons)
+    for source in inventory[1:]:
+        delta = ObjectDelta(obj, source, comparisons=default_comparisons)
+        if delta.dist < match.dist:
+            match = delta
+    if threshold is not None and match.dist > threshold:
+        log.debug(f"{obj} No matches meeting threshold (best {match.dist})")
+        return None
+    log.info(f"{obj} Match! Distance: {match.dist}")
+    return match

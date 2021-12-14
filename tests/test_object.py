@@ -43,18 +43,6 @@ def test_actions():
     assert pt3 != pt2
 
 
-def test_board_methods():
-    pts = [(1, 1, 1), (3, 1, 1)]
-    seed, normed = norm_pts(pts)
-    assert seed == (1, 1)
-    assert normed == [(0, 0, 1), (2, 0, 1)]
-
-    pts = [(4, 4), (3, 1)]
-    seed, normed = norm_pts(pts)
-    assert seed == (3, 1)
-    assert normed == [(1, 3), (0, 0)]
-
-
 def test_generation():
     dots = Object(0, 0, children=[Object(0, 0), Object(0, 4), Object(2, 2)])
     line = Object(4, 0, gens=["C4"])
@@ -88,30 +76,14 @@ def test_props():
     return boards
 
 
-def _disorder(grid, seed=7):
-    messy = grid.copy()
-    rows, cols = grid.shape
-    for ct in range(1, rows * cols, seed):
-        i, j = (ct // cols) % rows, ct % cols
-        messy[i, j] = (messy[i, j] + 1) % 11
-    return messy
+def test_flatten():
+    cluster = Object(0, 0, 2, children=[Object(0, 0), Object(1, 1)])
+    line = Object(0, 2, 3, gens=["R1"])
+    rect = Object(0, 3, 4, gens=["R1", "C1"])
+    middle_man = Object(children=[line, rect])
+    root = Object(children=[cluster, middle_man])
 
-
-def _get_leading_order(grid):
-    row_o = translational_order(grid, True)
-    col_o = translational_order(grid, False)
-    return (row_o[0][0], col_o[0][0])
-
-
-def test_order():
-    tile2x2 = np.tile([[1, 2], [3, 4]], (3, 3))
-    assert (2, 2) == _get_leading_order(tile2x2)
-    tile1x4 = np.tile([np.arange(4)], (8, 2))
-    assert (1, 4) == _get_leading_order(tile1x4)
-    tile2x5 = np.tile([np.arange(5), np.arange(5) + 1], (2, 2))
-    assert (2, 5) == _get_leading_order(tile2x5)
-    tile4x4 = np.tile([np.arange(4) + i for i in range(4)], (2, 2))
-    assert (4, 4) == _get_leading_order(tile4x4)
-    assert (2, 2) == _get_leading_order(_disorder(tile2x2))
-    assert (1, 4) == _get_leading_order(_disorder(tile1x4))
-    assert (4, 4) == _get_leading_order(_disorder(tile4x4))
+    flat = root.flatten()[0]
+    assert len(flat.children) == 3
+    grid = [2, 10, 3, 4, 4] + [10, 2, 3, 4, 4]
+    assert all(flat.grid.ravel() == grid)
