@@ -1,7 +1,7 @@
 import streamlit as st
 
 from arc.app.settings import Settings
-from arc.app.viz import cached_plot
+from arc.app.util import cached_plot
 
 
 def explorer():

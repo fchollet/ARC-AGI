@@ -66,12 +66,15 @@ class ARC:
                 return self.tasks[task_idx][scene_idx]
             case (task_idx, scene_idx, attribute):
                 return getattr(self.tasks[task_idx][scene_idx], attribute).rep
+            case str(partial_uid):
+                for task in self.tasks.values():
+                    if partial_uid in task.uid:
+                        return task
+                log.warning(f"Couldn't find a task with uid matching {partial_uid}")
+                return None
 
     def load_tasks(self, idxs: set[int] = set(), folder: str = ".") -> None:
-        """Load indicated task(s) from the ARC dataset.
-
-        Supplying 'idxs' will load specific tasks, while 'N' will load the first 'N'.
-        """
+        """Load indicated task(s) from the ARC dataset."""
         curr_idx, boards, tests = 1, 0, 0
         for filename in sorted(glob.glob(f"{folder}/*.json")):
             if curr_idx in idxs:

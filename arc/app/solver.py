@@ -1,7 +1,6 @@
 import streamlit as st
 
-from arc.app.util import timed
-from arc.app.viz import cached_plot
+from arc.app.util import timed, cached_plot
 
 
 def solver(task_idx: int):

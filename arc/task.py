@@ -11,7 +11,7 @@ from arc.selector import group_inputs, create_selectors, base_describe, describe
 from arc.object import Object
 from arc.transforms import const_map, t2t_map
 from arc.types import TaskData
-from arc.viz import plot_scenes
+from arc.viz import Layout, plot_layout
 
 log = logger.fancy_logger("Task", level=20)
 
@@ -66,13 +66,22 @@ class Task:
         log.info(self.raw["train"][0]["input"], extra={"fmt": "bare"})
 
     def plot(self) -> Figure:
-        return plot_scenes(
-            [
-                [(scene.input.rep.grid, scene.output.rep.grid) for scene in self.cases],
-                [(scene.input.rep.grid, scene.output.rep.grid) for scene in self.tests],
-            ],
-            ["Case", "Test"],
-        )
+        layout: Layout = [[], []]
+        for scene_idx, scene in enumerate(self.cases):
+            layout[0].append(
+                {"grid": scene.input.rep.grid, "name": f"Case {scene_idx}: Input"}
+            )
+            layout[1].append(
+                {"grid": scene.output.rep.grid, "name": f"Case {scene_idx}: Output"}
+            )
+        for scene_idx, scene in enumerate(self.tests):
+            layout[0].append(
+                {"grid": scene.input.rep.grid, "name": f"Test {scene_idx}: Input"}
+            )
+            layout[1].append(
+                {"grid": scene.output.rep.grid, "name": f"Test {scene_idx}: Output"}
+            )
+        return plot_layout(layout)
 
     @property
     def ppp(self) -> float:

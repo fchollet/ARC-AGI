@@ -1,35 +1,12 @@
-from io import BytesIO
-from matplotlib.figure import Figure
-from matplotlib import pyplot
-import streamlit as st
+import numpy as np
 
-from arc.viz import Layout, plot_grid, plot_layout
+from arc.viz import Layout, PlotDef
 from arc.object import Object
 
 
-@st.cache(allow_output_mutation=True, ttl=None)
-def cached_plot(plot_idx: int | tuple[int, int], plot_type: str = None) -> BytesIO:
-    _arc = st.session_state.arc
-    image_buffer = BytesIO()
-    if plot_type == "Tree":
-        fig: Figure = plot_layout(hier_layout(_arc[plot_idx].input.rep))
-    else:
-        match plot_idx:
-            case int(task_idx):
-                fig: Figure = _arc[task_idx].plot()
-            case (task_idx, scene_idx):
-                fig: Figure = plot_grid(_arc[(task_idx, scene_idx)].input.rep.grid)
-            case _:
-                return image_buffer
-
-    fig.savefig(image_buffer, format="png")
-    pyplot.close(fig)
-    return image_buffer
-
-
-def hier_layout(obj: Object) -> Layout:
+def tree_layout(obj: Object) -> Layout:
     objs = [obj]
-    layout = []
+    layout: Layout = []
     while objs:
         layout.append([{"grid": obj.grid, "name": obj._id} for obj in objs])
         objs = [
@@ -39,7 +16,8 @@ def hier_layout(obj: Object) -> Layout:
     # Pad the layout with blanks so each row has a fixed size
     max_width = max([len(row) for row in layout])
     for row in layout:
-        row += [0] * (max_width - len(row))
+        for i in range(max_width - len(row)):
+            row.append(None)
     return layout
 
 
