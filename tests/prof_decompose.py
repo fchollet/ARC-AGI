@@ -7,7 +7,7 @@ log = logger.fancy_logger("ProfDecomp", level=30)
 
 
 @profile.profile(threshold=0.00, dump_file="arc.prof")
-def reduction(arc: ARC):
+def decomposition(arc: ARC):
     log.info(f"Profiling execution on first scene from {arc.N} tasks")
     for idx in arc.selection:
         arc.tasks[idx][0].decompose()
@@ -15,4 +15,4 @@ def reduction(arc: ARC):
 
 if __name__ == "__main__":
     arc = ARC(N=10)
-    reduction(arc)
+    decomposition(arc)

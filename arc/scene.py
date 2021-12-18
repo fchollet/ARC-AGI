@@ -28,6 +28,7 @@ class Scene:
 
         # Initially, we start at shallow representations and proceed outward
         self._dist = -1
+        self._path = []
 
     @property
     def props(self) -> int:
@@ -55,9 +56,9 @@ class Scene:
     # TODO Below needs review/updating
     def match(self):
         """Identify the minimal transformation set needed from input -> output Board."""
-        self._dist, self.path = self.recreate(self.output.rep, self.input.inv())
+        self._dist, self._path = self.recreate(self.output.rep, self.input.inv())
         log.info(f"Minimal distance transformation ({self.dist}):")
-        for delta in self.path:
+        for delta in self._path:
             obj1, obj2, trans = delta.right, delta.left, delta.transform
             log.info(f"Tr {trans} | {obj1._id} -> {obj2._id}")
 

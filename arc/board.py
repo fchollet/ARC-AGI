@@ -4,12 +4,13 @@ import collections
 
 from matplotlib.figure import Figure
 from arc.comparisons import get_color_diff, get_order_diff, get_translation
+from arc.layouts import tree_layout
 
 from arc.util import logger
 from arc.object import Object, ObjectDelta
 from arc.processes import Process, MakeBase, ConnectObjects, SeparateColor
 from arc.types import BoardData
-from arc.viz import plot_grid
+from arc.viz import plot_layout
 
 log = logger.fancy_logger("Board", level=20)
 
@@ -42,13 +43,8 @@ class Board:
         # TODO remove?
         self.inventory = []
 
-        self._cplot = None
-
-    @property
-    def cplot(self) -> Figure:
-        if not self._cplot:
-            self._cplot = plot_grid(self.rep.grid)
-        return self._cplot
+    def plot_tree(self, **kwargs) -> Figure:
+        return plot_layout(tree_layout(self.rep), show_axis=False, **kwargs)
 
     def tree(self, obj: Object, ind: int = 0, level: int = 10) -> None:
         """Log the Board as an hierarchy of named Objects."""
@@ -95,7 +91,7 @@ class Board:
         while ct < max_iter:
             ct += 1
             self.batch_decomposition(batch=batch)
-            log.debug(f"== Reduction at {self.rep.props}p after {ct} rounds")
+            log.debug(f"== Decomposition at {self.rep.props}p after {ct} rounds")
             if not self.proc_q:
                 log.debug("===Ending decomposition due to empty processing queue")
                 break
@@ -104,7 +100,7 @@ class Board:
         self.rep.ppt("info")
 
     def batch_decomposition(self, batch: int = 10) -> None:
-        """Reduce the top 'batch' candidates."""
+        """Decompose the top 'batch' candidates."""
         ct = 0
         while self.proc_q and ct < batch:
             obj = self.proc_q.popleft()

@@ -96,7 +96,14 @@ class ARC:
         """
         match arg:
             case int(level):
-                for logname in ["Task", "Scene", "Board", "Object", "Processes"]:
+                for logname in [
+                    "Task",
+                    "Scene",
+                    "Board",
+                    "Object",
+                    "Processes",
+                    "Comparisons",
+                ]:
                     logging.getLogger(logname).setLevel(level)
             case {**levels}:
                 for name, loglevel in levels.items():

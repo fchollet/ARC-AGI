@@ -1,7 +1,6 @@
 import itertools
 
-from .util import logger
-from .util import dictutil
+from arc.util import dictutil, logger
 
 log = logger.fancy_logger("Selector", level=30)
 
@@ -21,14 +20,14 @@ def avg_link_distance(group):
 
 def group_inputs(self, variant=0):
     # initially, we assign each input object to its own group
-    groups = {idx: {0: [delta]} for idx, delta in enumerate(self.scenes[0].path)}
+    groups = {idx: {0: [delta]} for idx, delta in enumerate(self.cases[0]._path)}
 
     # Now add to each group based on the smallest distance
-    for s_idx, scene in enumerate(self.scenes[1:], 1):
+    for s_idx, scene in enumerate(self.cases[1:], 1):
         # Get all pairwise distances of new objects to groups
         dists = {}
         for g_idx, grp in groups.items():
-            for p_idx, delta in enumerate(scene.path):
+            for p_idx, delta in enumerate(scene._path):
                 dists[(g_idx, p_idx)] = 0
                 for gs_idx, gs_segs in grp.items():
                     dists[(g_idx, p_idx)] += sum([delta - seg for seg in gs_segs])
@@ -41,7 +40,7 @@ def group_inputs(self, variant=0):
                 best = dist
                 choice = perm
         for g_idx, ass in enumerate(choice):  # type: ignore
-            groups[g_idx][s_idx] = [scene.path[ass]]
+            groups[g_idx][s_idx] = [scene._path[ass]]
 
     # Identify the transforms present for each group
     codes = {}
@@ -125,7 +124,7 @@ def select(objs, selector):
 def create_selectors(task):
     selectors = {}
     # Describe the inventories in each scene
-    for s_idx, scene in enumerate(task.scenes):
+    for s_idx, scene in enumerate(task.cases):
         inputs = scene.input.rep.inventory()
         base_describe(inputs)
         describe(inputs)
@@ -138,7 +137,7 @@ def create_selectors(task):
     for g_idx, group in task.groups.items():
         all_objs = [seg.right for grp_segs in group.values() for seg in grp_segs]
         traits = common_traits(all_objs)
-        for s_idx, scene in enumerate(task.scenes):
+        for s_idx, scene in enumerate(task.cases):
             inputs = scene.input.rep.inventory()
             outputs = [seg.right for seg in group[s_idx]]
             if sorted(select(inputs, traits)) != sorted(outputs):

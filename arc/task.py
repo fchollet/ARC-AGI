@@ -65,7 +65,7 @@ class Task:
         log.info(f"Task {self.idx} UID = {self.uid} | First input board:")
         log.info(self.raw["train"][0]["input"], extra={"fmt": "bare"})
 
-    def plot(self) -> Figure:
+    def plot(self, **kwargs) -> Figure:
         layout: Layout = [[], []]
         for scene_idx, scene in enumerate(self.cases):
             layout[0].append(
@@ -81,7 +81,7 @@ class Task:
             layout[1].append(
                 {"grid": scene.output.rep.grid, "name": f"Test {scene_idx}: Output"}
             )
-        return plot_layout(layout)
+        return plot_layout(layout, **kwargs)
 
     @property
     def ppp(self) -> float:
@@ -109,7 +109,7 @@ class Task:
         """Apply decomposition across all cases, learning context and iterating."""
         # TODO apply context
         for scene in self.cases:
-            log.info(f" ++ Reducing ({self.idx}, {scene.idx}) for {max_iter} rounds")
+            log.info(f" ++ Decomposing ({self.idx}, {scene.idx}) for {max_iter} rounds")
             scene.decompose(batch=batch, max_iter=max_iter)
             log.info(f"Scene PpP -> {scene.ppp:.3f}")
         log.info(f"Average PpP -> {self.ppp:.3f}")

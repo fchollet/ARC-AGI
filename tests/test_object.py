@@ -1,6 +1,3 @@
-import numpy as np
-
-from arc.board_methods import norm_pts, translational_order
 from arc.concepts import Act
 from arc.object import Object
 

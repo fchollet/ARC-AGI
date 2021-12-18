@@ -434,12 +434,12 @@ class ObjectDelta:
     """
 
     def __init__(self, obj1: Object, obj2: Object, comparisons: list[ObjectComparison]):
-        self.dist = cst.MAX_DIST
+        self.dist = 0
         self.left = obj1
         self.right = obj2
         self.transform = {}
+        self.comparisons = comparisons
         if obj1 == obj2:
-            self.dist = 0
             return
 
         for comparison in comparisons:
@@ -465,7 +465,7 @@ class ObjectDelta:
     def __sub__(self, other):
         """Returns a distance between transforms, used for selection grouping"""
         # First is the distance between base objects (uses ObjectDelta)
-        dist = (self.right - other.right).dist
+        dist = ObjectDelta(self.right, other.right, self.comparisons).dist
 
         # Then, add in the difference in transforms
         d_xor = dictutil.dict_xor(self.transform, other.transform)

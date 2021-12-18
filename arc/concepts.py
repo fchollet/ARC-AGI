@@ -132,12 +132,15 @@ class Act:
         return cls.flip(item, 1)
 
 
+act_regex = re.compile(r"([A-Za-z]+)(\d+)")
+
+
 class Gen:
     def __init__(self, code=None, actions=None, condition=None, args=None):
         self.actions = actions or []
         self.condition = condition
         if code is not None:
-            acts, cond = re.match(r"([A-Za-z]+)(\d+)", code).groups()  # type: ignore
+            acts, cond = re.match(act_regex, code).groups()  # type: ignore
             self.acode = acts
             self.ccode = cond
             self.actions = [Act.action_map[ch] for ch in acts]

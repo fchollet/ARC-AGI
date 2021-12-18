@@ -1,7 +1,5 @@
-import numpy as np
-
 from arc.viz import Layout, PlotDef
-from arc.object import Object
+from arc.object import Object, ObjectDelta
 
 
 def tree_layout(obj: Object) -> Layout:
@@ -21,18 +19,14 @@ def tree_layout(obj: Object) -> Layout:
     return layout
 
 
-# def scene_layout(scene: Any):
-#     g1, shape1 = hier_layout(scene.input.rep)
-#     g2, shape2 = hier_layout(scene.output.rep)
-#     M, N = max(shape1[0], shape2[0]), shape1[1] + shape2[1] + 1
-#     output = [[0] * N for i in range(M)]
-#     for i in range(shape1[0]):
-#         for j in range(shape1[1]):
-#             output[i][j] = g1[i][j]
-#     for i in range(shape2[0]):
-#         for j in range(shape2[1]):
-#             output[i][shape1[1] + 1 + j] = g2[i][j]
-#     return output
+def match_layout(path: list[ObjectDelta]) -> Layout:
+    layout: Layout = []
+    for delta in path:
+        inp, out, trans = delta.right, delta.left, delta.transform
+        left: PlotDef = {"grid": inp.grid, "name": inp.category}
+        right: PlotDef = {"grid": out.grid, "name": str(trans.items())}
+        layout.append([left, right])
+    return layout
 
 
 # def leaf_layout(inp, out=None):
@@ -45,13 +39,3 @@ def tree_layout(obj: Object) -> Layout:
 #     pad_check = sorted([in_row, out_row], key=lambda x: len(x))
 #     pad_check[0] += [0] * (len(pad_check[1]) - len(pad_check[0]))
 #     return [in_row, out_row]
-
-
-# def match_layout(scene):
-#     grids = []
-#     for delta in scene.path:
-#         inp, out, trans = delta.right, delta.left, delta.transform
-#         left = {"grid": inp.grid, "name": inp.category}
-#         right = {"grid": out.grid, "name": trans}
-#         grids.append([left, right])
-#     return grids

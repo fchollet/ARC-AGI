@@ -5,15 +5,20 @@ from arc.definitions import Constants as cst
 from arc.util import logger
 from arc.object import Object
 
-log = logger.fancy_logger("Processes", level=30)
+log = logger.fancy_logger("Comparisons", level=30)
 
 
 def get_order_diff(left: Object, right: Object) -> tuple[int, dict[str, Any]]:
     """Checks for differences in the arrangement of points"""
+    log.debug("Comparing Order")
     dist: int = 0
     transform: dict[str, Any] = {}
-    if left.sil(right):
-        return dist, transform
+    if len(left.c_rank) == 1 and len(right.c_rank) == 1:
+        # A monochrome, matching silhouette means no internal positioning differences
+        if left.sil(right):
+            log.debug("  Sillhouettes match")
+            return dist, transform
+
     # Without a matching silhouette, only an ordered transformation works here
     # NOTE Including flooding and similar ops will change this
     if left.order[2] != 1 or right.order[2] != 1:
@@ -32,6 +37,7 @@ def get_order_diff(left: Object, right: Object) -> tuple[int, dict[str, Any]]:
 
 
 def get_color_diff(left: Object, right: Object) -> tuple[int, dict[str, Any]]:
+    log.debug("Comparing Color")
     dist: int = 0
     transform: dict[str, Any] = {}
     c1 = set([item[0] for item in left.c_rank])
@@ -48,6 +54,7 @@ def get_color_diff(left: Object, right: Object) -> tuple[int, dict[str, Any]]:
 
 
 def get_translation(left: Object, right: Object) -> tuple[int, dict[str, Any]]:
+    log.debug("Comparing Position")
     dist: int = 0
     transform: dict[str, Any] = {}
     r1, c1, _ = left.anchor

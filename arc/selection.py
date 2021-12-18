@@ -1,6 +1,6 @@
-from .util import logger
+from arc.util import logger
 
-log = logger.fancy_logger("Selection", fmt="bare", level=30)
+log = logger.fancy_logger("Selection", level=30)
 
 
 def obj_rank(s_list, name):

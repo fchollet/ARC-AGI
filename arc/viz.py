@@ -57,10 +57,11 @@ def plot_layout(layout: Layout, scale: float = 1.0, show_axis: bool = True) -> F
                 curr = axs[r]
             else:
                 curr = axs[r][c]
+            if args is None:
+                curr.axis("off")
+                continue
             if not show_axis:
                 curr.axis("off")
-            if args is None:
-                continue
             grid = args["grid"]
             curr.set_title(args["name"], {"fontsize": 6})
             curr.imshow(grid, cmap=color_map, norm=norm)
@@ -77,35 +78,3 @@ def plot_grid(grid: np.ndarray) -> Figure:
     axs.set_xticks(list(range(grid.shape[1])))
     # plt.tight_layout()
     return fig
-
-
-def plot_scenes(
-    scene_lists: list[list[tuple[np.ndarray, np.ndarray]]], groups: list[str]
-) -> Figure:
-    n = sum([len(scenes) for scenes in scene_lists])
-    fig, axs = plt.subplots(2, n, figsize=(4 * n, 8), dpi=50)
-    plt.subplots_adjust(wspace=0, hspace=0)
-    f_idx = 0
-    for group, scenes in zip(groups, scene_lists):
-        for scene_idx, (grid_in, grid_out) in enumerate(scenes):
-            axs[0][f_idx].imshow(grid_in, cmap=color_map, norm=norm)
-            axs[0][f_idx].set_title(f"{group}-{scene_idx} in")
-            axs[0][f_idx].set_yticks(list(range(grid_in.shape[0])))
-            axs[0][f_idx].set_xticks(list(range(grid_in.shape[1])))
-            axs[1][f_idx].imshow(grid_out, cmap=color_map, norm=norm)
-            axs[1][f_idx].set_title(f"{group}-{scene_idx} out")
-            axs[1][f_idx].set_yticks(list(range(grid_out.shape[0])))
-            axs[1][f_idx].set_xticks(list(range(grid_out.shape[1])))
-            f_idx += 1
-    plt.tight_layout()
-    return fig
-
-
-def plot_raw_task(task: TaskData) -> Figure:
-    cases = [
-        (np.array(scene["input"]), np.array(scene["output"])) for scene in task["train"]
-    ]
-    tests = [
-        (np.array(scene["input"]), np.array(scene["output"])) for scene in task["test"]
-    ]
-    return plot_scenes([cases, tests], ["Cases", "Tests"])
