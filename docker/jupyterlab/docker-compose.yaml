@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+  jupyterlab:
+    build:
+      context: ${HOME}/${REPOS}/arc_study
+      dockerfile: docker/${APP}/Dockerfile
+    image: ${APP}:latest
+    command: 
+      - "jupyter"
+      - "lab"
+      - "--allow-root"  # Needed to run as root user
+      - "--ip=0.0.0.0"  # Needed when running inside a Docker container
+      - "--port=${JUPYTERLAB_PORT}"
+      - "--no-browser"
+      - "--LabApp.token=''"  # Turn off security feature
+    # 'init: true' indicates Docker will handle child process reaping.
+    # This is critical for Jupyter to run correctly inside Docker.
+    init: true
+    ports:
+      - "${JUPYTERLAB_PORT}:${JUPYTERLAB_PORT}"
+    volumes:
+      - ${HOME}/${REPOS}/arc_study/arc/:${PYTHON_SITE_PACKAGES}/arc/
+      - ${HOME}/${REPOS}/arc_study/data/:/${APP}/data/
+      - ${HOME}/${VOLUMES}/notebooks/:/${APP}/notebooks/
+      - ${HOME}/${VOLUMES}/configuration/.jupyter/:/root/.jupyter/

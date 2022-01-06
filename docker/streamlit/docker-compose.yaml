@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  arc_sl:
+    build:
+      context: ${HOME}/${REPOS}/arc_study
+      dockerfile: docker/streamlit/Dockerfile
+    image: arc_sl:latest
+    command: 
+      - "streamlit"
+      - "run"
+      - "--browser.serverAddress=0.0.0.0"
+      - "streamlit_app.py"
+    ports:
+      - "${STREAMLIT_PORT}:${STREAMLIT_PORT}"
