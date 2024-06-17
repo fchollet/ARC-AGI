@@ -5,6 +5,8 @@
     border-top: 1px solid #555;
     float: left;
     background-color: #000;
+    font-size: 0.7em;
+    text-align: center;
 }
 
 .row {
