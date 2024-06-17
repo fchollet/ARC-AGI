@@ -117,6 +117,22 @@ function setCellSymbol(cell, symbol) {
     }
     cell.removeClass(classesToRemove);
     cell.addClass('symbol_' + symbol);
+    // Show numbers if "Show symbol numbers" is checked
+    if ($('#show_symbol_numbers').is(':checked')) {
+        cell.text(symbol);
+    } else {
+        cell.text('');
+    }
+}
+
+function changeSymbolVisibility() {
+    $('.cell').each(function(i, cell) {
+        if ($('#show_symbol_numbers').is(':checked')) {
+            $(cell).text($(cell).attr('symbol'));
+        } else {
+            $(cell).text('');
+        }
+    });
 }
 
 function errorMsg(msg) {
