@@ -7,8 +7,8 @@ import pathlib
 import numpy as np
 
 THIS_SCRIPT = pathlib.Path(__file__).parent.resolve()
-TRAIN_SUBSET_DIR = os.path.join(THIS_SCRIPT, "../data/training")
-TEST_SUBSET_DIR = os.path.join(THIS_SCRIPT, "../data/evaluation")
+TRAIN_SUBSET_DIR = os.path.join(THIS_SCRIPT, "../../data/training")
+TEST_SUBSET_DIR = os.path.join(THIS_SCRIPT, "../../data/evaluation")
 
 TRAINING_FILES = {
     f: os.path.join(TRAIN_SUBSET_DIR, f) for f in os.listdir(TRAIN_SUBSET_DIR)
