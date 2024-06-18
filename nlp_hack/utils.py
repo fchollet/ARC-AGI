@@ -18,8 +18,6 @@ EVALUATION_FILES = {
 }
 ALL_FILES = EVALUATION_FILES | TRAINING_FILES
 
-print(ALL_FILES)
-
 
 def get_sample(file_path: str):
     """Parse a JSON file and return its content as a dictionary."""
