@@ -2,7 +2,6 @@ import json
 import os
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.colors as mcolors
 
 PROMPT = """
 Task Introduction:
@@ -37,6 +36,19 @@ Here's the data for the task:
 {json_data}
 """
 
+color_map = {
+    0: '#000000',
+    1: '#0074D9',
+    2: '#FF4136',
+    3: '#2ECC40',
+    4: '#FFDC00',
+    5: '#AAAAAA',
+    6: '#F012BE',
+    7: '#FF851B',
+    8: '#7FDBFF',
+    9: '#870C25'
+}
+
 def load_all_json_files(folder_path):
     """
     Load all JSON files in the specified folder.
@@ -60,64 +72,42 @@ def load_all_json_files(folder_path):
         file_path = os.path.join(folder_path, json_file)
         with open(file_path, 'r') as f:
             data = json.load(f)
-            json_data_list[json_file] =data
+            json_data_list[json_file] = data
     
     return json_data_list
 
 
-# Define the color mapping
-color_map = {
-    0: '#000000',
-    1: '#0074D9',
-    2: '#FF4136',
-    3: '#2ECC40',
-    4: '#FFDC00',
-    5: '#AAAAAA',
-    6: '#F012BE',
-    7: '#FF851B',
-    8: '#7FDBFF',
-    9: '#870C25'
-}
+def plot_matrix(ax, matrix, title, show_grid=True):
+    """
+    Helper function to plot a single matrix with given title on the provided axis.
+
+    Parameters:
+        ax: The axis to plot on.
+        matrix: The matrix to plot.
+        title: The title of the plot.
+        show_grid: Whether to show the grid on the plot.
+    """
+    # Create custom colormap
+    cmap = mcolors.ListedColormap([color_map[num] for num in range(10)])
+    bounds = np.arange(-0.5, 10, 1)
+    norm = mcolors.BoundaryNorm(bounds, cmap.N)
+
+    # Plot matrix
+    im = ax.imshow(matrix, cmap=cmap, norm=norm)
+    ax.set_title(title)
+    ax.set_xticks(np.arange(-.5, len(matrix[0]), 1))
+    ax.set_yticks(np.arange(-.5, len(matrix), 1))
+    if show_grid:
+        ax.grid(which='both', color='gray', linestyle='-', linewidth=1)
+    ax.tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
 
 def visualize_data(data):
     """
     Visualizes the input and output matrices in the provided data using Matplotlib.
 
     Parameters:
-    data (dict): The data containing 'train' and 'test' sets with 'input' and 'output' matrices.
+        data: The data containing 'train' and 'test' sets with 'input' and 'output' matrices.
     """
-    def plot_matrices(matrices, title_prefix, start_row, axes):
-        for i, matrix in enumerate(matrices):
-            input_matrix = np.array(matrix['input'])
-            output_matrix = np.array(matrix['output'])
-
-            ax_input = axes[start_row + i, 0]
-            ax_output = axes[start_row + i, 1]
-
-            # Create custom colormap
-            cmap = mcolors.ListedColormap([color_map[num] for num in range(10)])
-            bounds = np.arange(-0.5, 10, 1)
-            norm = mcolors.BoundaryNorm(bounds, cmap.N)
-
-            # Plot input matrix
-            im1 = ax_input.imshow(input_matrix, cmap=cmap, norm=norm)
-            ax_input.set_title(f'{title_prefix} Input {i+1}')
-            ax_input.set_xticks(np.arange(-.5, input_matrix.shape[1], 1))
-            ax_input.set_yticks(np.arange(-.5, input_matrix.shape[0], 1))
-            ax_input.grid(which='both', color='gray', linestyle='-', linewidth=1)
-            ax_input.tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
-
-            # Plot output matrix
-            if title_prefix != 'Test':
-                im2 = ax_output.imshow(output_matrix, cmap=cmap, norm=norm)
-                ax_output.set_title(f'{title_prefix} Output {i+1}')
-                ax_output.set_xticks(np.arange(-.5, output_matrix.shape[1], 1))
-                ax_output.set_yticks(np.arange(-.5, output_matrix.shape[0], 1))
-                ax_output.grid(which='both', color='gray', linestyle='-', linewidth=1)
-                ax_output.tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
-            else:
-                ax_output.axis('off')
-
     num_train = len(data.get('train', []))
     num_test = len(data.get('test', []))
     total_matrices = num_train + num_test
@@ -126,11 +116,15 @@ def visualize_data(data):
 
     # Plot train data
     if 'train' in data:
-        plot_matrices(data['train'], 'Train', 0, axes)
+        for i, matrix in enumerate(data['train']):
+            plot_matrix(axes[i, 0], matrix['input'], f'Train Input {i+1}')
+            plot_matrix(axes[i, 1], matrix['output'], f'Train Output {i+1}')
 
     # Plot test data
     if 'test' in data:
-        plot_matrices(data['test'], 'Test', num_train, axes)
+        for i, matrix in enumerate(data['test']):
+            plot_matrix(axes[num_train + i, 0], matrix['input'], f'Test Input {i+1}')
+            plot_matrix(axes[num_train + i, 1], matrix['output'], f'Test Output {i+1}', show_grid=False)
 
     plt.tight_layout()
     plt.savefig('output.png', bbox_inches='tight', pad_inches=0.1)
@@ -144,28 +138,11 @@ def compare_model_output_and_gt(model_output, ground_truth):
     model_output (list of list of int): The model output matrix.
     ground_truth (list of list of int): The ground truth matrix.
     """
-    fig, axes = plt.subplots(1, 2, figsize=(10, 10))
+    _, axes = plt.subplots(1, 2, figsize=(10, 10))
 
-    # Create custom colormap
-    cmap = mcolors.ListedColormap([color_map[num] for num in range(10)])
-    bounds = np.arange(-0.5, 10, 1)
-    norm = mcolors.BoundaryNorm(bounds, cmap.N)
-
-    # Plot model output
-    im1 = axes[0].imshow(model_output, cmap=cmap, norm=norm)
-    axes[0].set_title('Model output')
-    axes[0].set_xticks(np.arange(-.5, len(model_output[0]), 1))
-    axes[0].set_yticks(np.arange(-.5, len(model_output), 1))
-    axes[0].grid(which='both', color='gray', linestyle='-', linewidth=1)
-    axes[0].tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
-
-    # Plot ground truth
-    im2 = axes[1].imshow(ground_truth, cmap=cmap, norm=norm)
-    axes[1].set_title('Ground truth')
-    axes[1].set_xticks(np.arange(-.5, len(ground_truth[0]), 1))
-    axes[1].set_yticks(np.arange(-.5, len(ground_truth), 1))
-    axes[1].grid(which='both', color='gray', linestyle='-', linewidth=1)
-    axes[1].tick_params(which='both', bottom=False, left=False, labelbottom=False, labelleft=False)
+    # Plot model output and ground truth
+    plot_matrix(axes[0], model_output, 'Model output')
+    plot_matrix(axes[1], ground_truth, 'Ground truth')
 
     plt.tight_layout()
     plt.savefig('comparison.png', bbox_inches='tight', pad_inches=0.1)
