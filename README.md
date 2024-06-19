@@ -1,5 +1,7 @@
 # Abstraction and Reasoning Corpus for Artificial General Intelligence (ARC-AGI)
 
+> ARC Prize, a $1,000,000+ public competition to beat and open source a solution to the ARC-AGI benchmark, is now live. See [ARCprize.org](https://arcprize.org/) for more details.
+
 This repository contains the ARC-AGI task data, as well as a browser-based interface for humans to try their hand at solving the tasks manually.
 
 *"ARC can be seen as a general artificial intelligence benchmark, as a program synthesis benchmark, or as a psychometric intelligence test. It is targeted at both humans and artificially intelligent systems that aim at emulating a human-like form of general fluid intelligence."*
@@ -8,6 +10,7 @@ A complete description of the dataset, its goals, and its underlying logic, can 
 
 As a reminder, a test-taker is said to solve a task when, upon seeing the task for the first time, they are able to produce the correct output grid for *all* test inputs in the task (this includes picking the dimensions of the output grid). For each test input, the test-taker is allowed 3 trials (this holds for all test-takers, either humans or AI).
 
+Note: This repository specifically contains the tasks for `ARC-AGI-1` task data. Future versions of the ARC-AGI benchmark will be versioned (ex: ARC-AGI-2, etc.).
 
 ## Task file format
 
