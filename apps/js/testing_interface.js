@@ -169,8 +169,39 @@ function loadTaskFromFile(e) {
 
         $('#load_task_file_input')[0].value = "";
         display_task_name(file.name, null, null);
+        $("#task_id_input_2").val('');
+        $("#prev_task_btn").prop('disabled', true);
+        $("#next_task_btn").prop('disabled', true);
     };
     reader.readAsText(file);
+}
+
+function loadTaskById(subset, task_index) {
+    $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + subset, function(tasks) {
+        var task = tasks[task_index];
+        $.getJSON(task["download_url"], function(json) {
+            try {
+                train = json['train'];
+                test = json['test'];
+            } catch (e) {
+                errorMsg('Bad file format');
+                return;
+            }
+            loadJSONTask(train, test);
+            //$('#load_task_file_input')[0].value = "";
+            infoMsg("Loaded task training/" + task["name"]);
+            display_task_name(task['name'], task_index, tasks.length);
+            $('#task_id_input_2').val(task_index);
+            $("#prev_task_btn").prop('disabled', false);
+            $("#next_task_btn").prop('disabled', false);
+        })
+        .error(function(){
+          errorMsg('Error loading task');
+        });
+    })
+    .error(function(){
+      errorMsg('Error loading task list');
+    });
 }
 
 function randomTask() {
@@ -190,6 +221,7 @@ function randomTask() {
             //$('#load_task_file_input')[0].value = "";
             infoMsg("Loaded task training/" + task["name"]);
             display_task_name(task['name'], task_index, tasks.length);
+            $('#task_id_input_2').val(task_index);
         })
         .error(function(){
           errorMsg('Error loading task');
@@ -198,6 +230,34 @@ function randomTask() {
     .error(function(){
       errorMsg('Error loading task list');
     });
+}
+
+function loadTask(element) {
+    var task_index = $(element).prev().val();
+    if (!task_index) {
+        errorMsg('Invalid Task ID. Please enter a valid task ID');
+        alert('Invalid Task ID. Please enter a valid task ID');
+        return;
+    }
+    loadTaskById("training", task_index);
+}
+
+function loadPrevTask() {
+    var curr_task_index = parseInt($('#task_id_input_2').val(), 10);
+    if (curr_task_index == 0) {
+        errorMsg('No previous test input. Pick another file?')
+        return
+    }
+    loadTaskById("training", curr_task_index - 1);
+}
+
+function loadNextTask() {
+    var curr_task_index = parseInt($('#task_id_input_2').val(), 10);
+    if (curr_task_index == 399) {
+        errorMsg('No next test input. Pick another file?')
+        return
+    }
+    loadTaskById("training", curr_task_index + 1);
 }
 
 function nextTestInput() {
