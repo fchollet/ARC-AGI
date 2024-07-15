@@ -1,0 +1,4 @@
+beartype
+pre-commit
+numpy
+pandas
