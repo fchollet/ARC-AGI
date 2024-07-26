@@ -16,6 +16,13 @@ def get_llm_response(prompt):
     )
     return response.choices[0].message.content
 
+def get_llm_response(conversation):
+
+    response = client.chat.completions.create(
+        model="gpt-4o",
+        messages=conversation,
+        )
+    return response.choices[0].message.content
 
 preamble = """
 lets play a game where you are transforming an input grid of numbers into an output grid of numbers
@@ -43,11 +50,19 @@ def nl_and_io_prompt(task):
     input_output_example = "\n\nhere is an example of an input grid and its corresponding output grid:\n"
     input_output_example += "example input grid:\n" + str(train_input) + "\nexample output grid:\n" + str(train_output) + "\n\n"
 
-    input_grid = task['problem']['test'][0]['input']
+    input_grid = task['problem']['train'][1]['input']
 
     prompt = preamble + instruction + input_output_example + "\n\nThe input grid is:\n" + str(input_grid) + "\n\nWhat is the output grid?"
     return prompt 
 
+def review(grid):
+    prompt = f'''Your output was incorrect.
+The correct answer is {grid}.
+
+Please clearly identify the differences between the correct answer and your output.
+Specifically, highlight which part of the given task description was not accurately executed, resulting in this discrepancy.
+Then, provide the correct answer based on the correct interpretation of the task.'''
+    
 if __name__ == '__main__':
 
     max_num_tasks = 1
@@ -57,13 +72,24 @@ if __name__ == '__main__':
         larc_gpt4 = json.load(json_file)
 
     print(len(larc_gpt4))
-    
     for task in larc_gpt4[:max_num_tasks]:
-        prompt = nl_and_io_prompt(task)
-        print(prompt)
 
-        answer = get_llm_response(prompt)
+        conversation = [{"role": "system", "content": "You are an autonomous task solver."}]
+        prompt = nl_and_io_prompt(task)
+        conversation.append({'role': 'user', 'content': prompt})
+
+        print(prompt)
+        answer = get_llm_response(conversation)
         print(answer)
+        conversation.append({'role': 'assistant', 'content': answer})
+
+        for round in range(10):
+            print(f'Round {round}')
+            prompt = review(task['problem']['train'][1]['output'])
+            conversation.append({'role': 'user', 'content': prompt})
+            answer = get_llm_response(conversation)
+            print(answer)
+            conversation.append({'role': 'assistant', 'content': answer})
 
         task['prediction'] = answer
 
