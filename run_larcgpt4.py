@@ -93,5 +93,10 @@ if __name__ == '__main__':
 
         task['prediction'] = answer
 
+        for conv in conversation:
+            print('-'*10)
+            print(f'[{conv['role']}]')
+            print(conv['content'])
+
         with open('results/larc_gpt4_newer.json', 'w') as outfile:
             json.dump(larc_gpt4, outfile)
