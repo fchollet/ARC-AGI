@@ -53,6 +53,10 @@
                         <input type="file" id="load_task_file_input" class="load_task" style="display: none;"/>
                         <input type="button" value="Browse..." onclick="document.getElementById('load_task_file_input').click();" />
                         <button onclick="randomTask()" id="random_task_btn"> Random... </button>
+
+                        <button onclick="previousTask()" id="prev_task_btn">Previous Task</button>
+                        <button onclick="nextTask()" id="next_task_btn">Next Task</button>
+                    
                         <p>
                         <label id='task_name' for="random_task_btn"> Task name: </label>
                         <p>
