@@ -22,6 +22,11 @@
                 <br />
                 <input type="file" class="load_task"/>
                 <button onclick="randomTask()" id="random_task_btn">Random task</button>
+
+                <!-- Add new input for task index -->
+                <input type="number" id="task_index_input" placeholder="Enter task index">
+                <button onclick="loadTaskByIndex()" id="load_task_by_index_btn">Load by Index</button>
+            
             </div>
         </div>
         <div id="workspace">
