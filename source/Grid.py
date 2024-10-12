@@ -93,9 +93,6 @@ class Grid():
         # Paste the test grid into the combined grid
         combined_grid.paste(test_grid, 0, current_y)
         
-        # Save the combined grid as an SVG
-        combined_grid.to_svg("combined_output")
-        
         return combined_grid
         
         
