@@ -67,7 +67,32 @@ class Grid():
         obj.rotate_90_()
         self.paste(obj, x, y)
     
+    def flip_(self, axis: int):
+        self.grid = np.flip(self.grid, axis=axis)
     
+    def flip(self, x: int, y: int, w: int, h: int, axis: int):
+        assert x + w <= self.w and y + h <= self.h 
+        obj = self.copy(x, y, w, h)
+        obj.flip_(axis)
+        self.paste(obj, x, y)
+    
+    def recolor_(self, target_color: int, replacement_color: int):
+        for i in range(self.h):
+            for j in range(self.w):
+                if self.grid[i, j] == target_color:
+                    self.grid[i, j] = replacement_color
+    
+    def flood_(self, x: int, y: int, replacement_color: int):
+        if x < 0 or y < 0 or x >= self.w or y >= self.h:
+            return
+        if self.grid[y, x] == BLACK:
+            return
+        self.grid[y, x] = replacement_color
+        self.flood_(x+1, y, target_color, replacement_color)
+        self.flood_(x-1, y, target_color, replacement_color)
+        self.flood_(x, y+1, target_color, replacement_color)
+        self.flood_(x, y-1, target_color, replacement_color)
+
     # Import/Export/Visualize functions  
     @staticmethod
     def from_json_file(json_file_path: str) -> 'Grid':
@@ -153,6 +178,28 @@ class Grid():
         tree.write(f"{file_path}.svg", encoding='unicode', xml_declaration=True)
         print(f"SVG saved as {file_path}.svg")
 
+
+def or(grid1: Grid, grid2: Grid, color: int) -> Grid:
+    combined_grid = Grid(np.zeros((max(grid1.h, grid2.h), max(grid1.w, grid2.w)), dtype=int))
+    mask1 = grid1.grid != 0
+    mask2 = grid2.grid != 0
+    combined_grid.grid = np.where(mask1 | mask2, color, 0)
+    return combined_grid
+    
+def and(grid1: Grid, grid2: Grid) -> Grid:
+    combined_grid = Grid(np.zeros((max(grid1.h, grid2.h), max(grid1.w, grid2.w)), dtype=int))
+    mask1 = grid1.grid != 0
+    mask2 = grid2.grid != 0
+    combined_grid.grid = np.where(mask1 & mask2, color, 0)
+    return combined_grid
+
+def majority(grid1: Grid, grid2: Grid, grid3: Grid, color) -> Grid:
+    combined_grid = Grid(np.zeros((max(grid1.h, grid2.h, grid3.h), max(grid1.w, grid2.w, grid3.w)), dtype=int))
+    mask1 = grid1.grid != 0
+    mask2 = grid2.grid != 0
+    mask3 = grid3.grid != 0
+    combined_grid.grid = np.where(mask1 + mask2 + mask3 >= 2, color, 0)
+    return combined_grid
 
 if __name__ == "__main__":
     arc_example = Grid.from_json_file("data/training/ff805c23.json")
