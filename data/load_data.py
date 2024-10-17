@@ -13,6 +13,15 @@ def load_dataset(mode='evaluation'):
 
 
 class JSONDataset(Dataset):
+    """ 
+        Loads in data and returns it as nested dictionary of following format: 
+            {
+                'train': [{'input': torch.tensor, 'output': torch.tensor}, ...],
+                'test': [{'input': torch.tensor, 'output': torch.tensor}, ...]
+            }
+        Where each tensor is a 3D tensor representing a [1 x h x w] grid. Reason for 3D (vs. 2D) is a PyTorch quirk when doing nested data like this.
+    """
+    
     def __init__(self, mode='evaluation'):
         """ mode: 'training' or 'evaluation'. Determines which directory to load from. """
         if mode not in ['training', 'evaluation']:
@@ -35,6 +44,8 @@ class JSONDataset(Dataset):
                 file_path = os.path.join(target_dir, file_name)
                 with open(file_path, 'r') as f:
                     json_data = json.load(f)
+                    json_data['train'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['train']]
+                    json_data['test'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['test']]
                     self.data.append(json_data)
 
     def __len__(self):
