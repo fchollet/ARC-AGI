@@ -1,2 +1,5 @@
 *.svg
 *.png
+.ipynb_checkpoints/
+__pycache__/
+arc-291c/
