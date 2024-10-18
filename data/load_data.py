@@ -44,6 +44,7 @@ class JSONDataset(Dataset):
                 file_path = os.path.join(target_dir, file_name)
                 with open(file_path, 'r') as f:
                     json_data = json.load(f)
+                    json_data['id'] = file_name.split('.')[0]
                     json_data['train'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['train']]
                     json_data['test'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['test']]
                     self.data.append(json_data)
