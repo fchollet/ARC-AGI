@@ -2,9 +2,32 @@ import os
 import json
 import torch
 from torch.utils.data import Dataset
+import numpy as np
+from source.objects import ARC_Object
 
 TRAIN_DIR = 'training'
 EVAL_DIR = 'evaluation'
+
+def quick_load(id: str) -> (list[dict[str, ARC_Object]], dict[str, ARC_Object]):
+    ''' Loads a given id in training data as ARC_Objects, primarily for ease of testing '''
+    with open(f'data/training/{id}.json', 'r') as f:
+        json_data = json.load(f)
+        json_data['id'] = id
+        json_data['train'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['train']]
+        json_data['test'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['test']]
+        train_objs = []
+        for t in json_data['train']:
+            input_image = t['input'].squeeze(0).numpy()
+            output_image = t['output'].squeeze(0).numpy()
+            input_object = ARC_Object(input_image, np.ones_like(input_image))
+            output_object = ARC_Object(output_image, np.ones_like(output_image))
+            train_objs.append({'input': input_object, 'output': output_object})
+        input_image = json_data['test'][0]['input'].squeeze(0).numpy()
+        output_image = json_data['test'][0]['output'].squeeze(0).numpy()
+        input_object = ARC_Object(input_image, np.ones_like(input_image))
+        output_object = ARC_Object(output_image, np.ones_like(output_image))
+        test_obj = {'input': input_object, 'output': output_object}
+        return train_objs, test_obj
 
 
 def load_dataset(mode='evaluation'):
