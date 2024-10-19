@@ -8,9 +8,9 @@ from source.objects import ARC_Object
 TRAIN_DIR = 'training'
 EVAL_DIR = 'evaluation'
 
-def quick_load(id: str) -> (list[dict[str, ARC_Object]], dict[str, ARC_Object]):
-    ''' Loads a given id in training data as ARC_Objects, primarily for ease of testing '''
-    with open(f'data/training/{id}.json', 'r') as f:
+def quick_load(id: str, dir: str) -> (list[dict[str, ARC_Object]], dict[str, ARC_Object]):
+    ''' Loads a given id in given data directory as ARC_Objects, primarily for ease of testing '''
+    with open(f'data/{dir}/{id}.json', 'r') as f:
         json_data = json.load(f)
         json_data['id'] = id
         json_data['train'] = [{'input': torch.tensor(sample['input']), 'output': torch.tensor(sample['output'])} for sample in json_data['train']]
