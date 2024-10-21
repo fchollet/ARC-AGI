@@ -80,28 +80,44 @@ def plot_image_and_mask(image, mask=None, title=""):
     
     
 def visualize_problem(puzzle_id: str):
-    with open(f"training/{puzzle_id}.json", 'r') as f:
+    with open(f"data/training/{puzzle_id}.json", 'r') as f:
         data = json.load(f)
     examples = data['train']
     
     input_grids = [(np.array(example['input']), np.array(example['output'])) for example in examples]
-    test_grid = np.array(data['test'][0]['input'])
+    test_grid = (np.array(data['test'][0]['input']), np.array(data['test'][0]['output']))
+    # add borders to all grids
+    input_grids = [(np.pad(input_grid, 1, constant_values=BORDER), np.pad(output_grid, 1, constant_values=BORDER)) for input_grid, output_grid in input_grids]
+    test_grid = (np.pad(test_grid[0], 1, constant_values=BORDER), np.pad(test_grid[1], 1, constant_values=BORDER))
+    
     #find the max dimensions of all the grids: input, output, and test
-    max_height = max([grid.shape[0] for grid, _ in input_grids] + [test_grid.shape[0]])
-    max_width = max([grid.shape[1] for grid, _ in input_grids] + [test_grid.shape[1]])
+    max_height = max([grid.shape[0] for grid, _ in input_grids] + [test_grid[0].shape[0], test_grid[1].shape[0]])
+    max_width = max([grid.shape[1] for grid, _ in input_grids] + [test_grid[0].shape[1], test_grid[1].shape[1]])
                     
     # Create a new grid to hold all the grids
-    combined_height = (2+ max_height) * len(input_grids)
-    combined_width = 2 * max_width + 2
+    combined_height = (1+ max_height) * (len(input_grids )+1)+3
+    combined_width = 2 * max_width + 1
     combined_grid = np.zeros((combined_height, combined_width), dtype=int)
 
     # Paste all input grids into the combined grid
     current_y = 0
     for input_grid, output_grid in input_grids:
         combined_grid[current_y:current_y + input_grid.shape[0], 0:input_grid.shape[1]] = input_grid
-        combined_grid[current_y:current_y + output_grid.shape[0], input_grid.shape[1] + 2:input_grid.shape[1] + 2 + output_grid.shape[1]] = output_grid
-        current_y += input_grid.shape[0] + 2
-
+        combined_grid[current_y:current_y + output_grid.shape[0], 
+                      input_grid.shape[1] + 1:input_grid.shape[1] + 1 + output_grid.shape[1]] = output_grid
+        current_y += input_grid.shape[0] + 1
+        
+    # draw a line to separate the input and output grids
+    combined_grid[current_y, :] = BORDER
+    current_y += 2
+    # Paste the test grid into the combined grid
+    combined_grid[current_y:current_y + test_grid[0].shape[0], 0:test_grid[0].shape[1]] = test_grid[0]
+    combined_grid[current_y:current_y + test_grid[1].shape[0], 
+                  test_grid[0].shape[1] + 1:test_grid[0].shape[1] + 1 + test_grid[1].shape[1]] = test_grid[1]
+    current_y += max_height
+    # remove extra space at the bottom
+    combined_grid = combined_grid[:current_y]
+    combined_height = current_y
     # draw this grid
     border_size = 1
     cell_size = 13
@@ -119,3 +135,5 @@ def visualize_problem(puzzle_id: str):
             x = j * (cell_size + border_size) + border_size
             y = i * (cell_size + border_size) + border_size
             draw.rectangle([x, y, x + cell_size, y + cell_size], fill=COLOR_TO_HEX[color], outline=COLOR_TO_HEX[BORDER])
+    
+    return img
