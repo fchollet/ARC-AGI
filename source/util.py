@@ -1,5 +1,19 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from PIL import Image, ImageDraw
+import json
+
+BLACK = 0
+BLUE = 1
+ORANGE = 2
+GREEN = 3
+YELLOW = 4
+GREY = 5
+PINK = 6
+LIGHT_ORANGE = 7
+CYAN = 8
+RED = 9
+BORDER = 10
 
 COLOR_TO_HEX = {
     -1: '#FF6700',  # blaze orange
@@ -36,9 +50,6 @@ def plot_tensors_with_colors(tensors):
     plt.show()
 
 
-# PLOTTING WITH MASKING
-# ====================================================
-
 def plot_image_and_mask(image, mask=None, title=""):
     """
     Plot an image tensor with the corresponding mask.
@@ -65,3 +76,46 @@ def plot_image_and_mask(image, mask=None, title=""):
     plt.title(title)
     plt.axis('off')
     plt.show()
+    
+    
+    
+def visualize_problem(puzzle_id: str):
+    with open(f"training/{puzzle_id}.json", 'r') as f:
+        data = json.load(f)
+    examples = data['train']
+    
+    input_grids = [(np.array(example['input']), np.array(example['output'])) for example in examples]
+    test_grid = np.array(data['test'][0]['input'])
+    #find the max dimensions of all the grids: input, output, and test
+    max_height = max([grid.shape[0] for grid, _ in input_grids] + [test_grid.shape[0]])
+    max_width = max([grid.shape[1] for grid, _ in input_grids] + [test_grid.shape[1]])
+                    
+    # Create a new grid to hold all the grids
+    combined_height = (2+ max_height) * len(input_grids)
+    combined_width = 2 * max_width + 2
+    combined_grid = np.zeros((combined_height, combined_width), dtype=int)
+
+    # Paste all input grids into the combined grid
+    current_y = 0
+    for input_grid, output_grid in input_grids:
+        combined_grid[current_y:current_y + input_grid.shape[0], 0:input_grid.shape[1]] = input_grid
+        combined_grid[current_y:current_y + output_grid.shape[0], input_grid.shape[1] + 2:input_grid.shape[1] + 2 + output_grid.shape[1]] = output_grid
+        current_y += input_grid.shape[0] + 2
+
+    # draw this grid
+    border_size = 1
+    cell_size = 13
+
+    # Calculate image dimensions
+    img_width = combined_width * cell_size + (combined_width + 1) * border_size
+    img_height = combined_height * cell_size + (combined_height + 1) * border_size
+
+    img = Image.new('RGB', (img_width, img_height), COLOR_TO_HEX[BORDER])
+    draw = ImageDraw.Draw(img)
+
+    # Draw colored rectangles for each cell
+    for i, row in enumerate(combined_grid):
+        for j, color in enumerate(row):
+            x = j * (cell_size + border_size) + border_size
+            y = i * (cell_size + border_size) + border_size
+            draw.rectangle([x, y, x + cell_size, y + cell_size], fill=COLOR_TO_HEX[color], outline=COLOR_TO_HEX[BORDER])

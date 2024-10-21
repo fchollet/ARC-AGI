@@ -3,10 +3,10 @@ import json
 import torch
 from torch.utils.data import Dataset
 import numpy as np
-from source.objects import ARC_Object
+from objects import ARC_Object
 
-TRAIN_DIR = 'training'
-EVAL_DIR = 'evaluation'
+TRAIN_DIR = '../data/training'
+EVAL_DIR = '../data/evaluation'
 
 def quick_load(id: str, dir: str) -> (list[dict[str, ARC_Object]], dict[str, ARC_Object]):
     ''' Loads a given id in given data directory as ARC_Objects, primarily for ease of testing '''

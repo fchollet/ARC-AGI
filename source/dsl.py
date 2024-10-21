@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from scipy.stats import mode
 
-from source.objects import ARC_Object
+from objects import ARC_Object
 
 '''
 All DSL operations return a new copy of object
@@ -100,6 +100,16 @@ def majority(objs: list[ARC_Object]) -> ARC_Object:
                 grid = np.delete(grid, 0, 1)
         grids.append(grid)
     stacked = np.stack(grids, axis=0)
+    majority, _ = mode(stacked, axis=0)
+    image = majority.squeeze()
+    return ARC_Object(image, np.ones_like(image))
+
+#might be better for certain denoising tasks
+def batch_position_wise_majority(objs: list[ARC_Object]) -> ARC_Object:
+    '''
+    For each position in the grid, find the most common color among all objects.
+    '''
+    stacked = np.stack([o.grid for o in objs], axis=0)
     majority, _ = mode(stacked, axis=0)
     image = majority.squeeze()
     return ARC_Object(image, np.ones_like(image))
