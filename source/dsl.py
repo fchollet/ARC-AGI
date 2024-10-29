@@ -2,7 +2,7 @@ import numpy as np
 from copy import deepcopy
 from scipy.stats import mode
 
-from source.objects import ARC_Object
+from objects import ARC_Object
 
 '''
 All DSL operations return a new copy of object

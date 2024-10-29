@@ -2,4 +2,7 @@
 *.png
 .ipynb_checkpoints/
 __pycache__/
+*.egg-info/
+# python environments
 arc-291c/
+arc

@@ -1,20 +1,22 @@
 import torch
 import torch.nn.functional as F
-import torchvision.models as models
-
 import numpy as np
 import matplotlib.pyplot as plt
 
-from source.util import hex_to_rgb, COLOR_TO_HEX
-
-# Load the pretrained ResNet
-RESNET = models.resnet50(pretrained=True)
-RESNET = torch.nn.Sequential(*list(RESNET.children())[:-1])
+from util import hex_to_rgb, COLOR_TO_HEX
 
 
-def get_embedding(image, display=False):
+
+def load_resnet50():
+    # Load the pretrained ResNet
+    from torchvision.models import resnet50
+    resnet50 = resnet50(pretrained=True)
+    resnet50 = torch.nn.Sequential(*list(resnet50.children())[:-1])
+    return resnet50
+
+def get_embedding(image, encoder, display=False):
     """
-    Takes an image (numpy array) and returns the embedding of the image using a pretrained ResNet model.
+    Takes an image (numpy array) and returns the embedding of the image using a passed in encoder.
 
     Args:
         image (numpy.ndarray): The input image.
@@ -38,7 +40,7 @@ def get_embedding(image, display=False):
 
     # Get embedding from ResNet
     with torch.no_grad():
-        embedding = RESNET(image_rgb)
+        embedding = encoder(image_rgb)
 
     # Flatten the output (ResNet output shape will be [batch_size, 2048, 1, 1] if height and width are large enough)
     embedding = embedding.view(embedding.size(0), -1)  # Flatten to [batch_size, 2048]

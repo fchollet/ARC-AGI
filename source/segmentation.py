@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-from source.objects import ARC_Object
+from objects import ARC_Object
 
 
 def extract_objects(source_object, method='color', print_on_init=False):
