@@ -30,7 +30,6 @@ COLOR_TO_HEX = {
     10: '#555555',  # border
 }
 
-
 def hex_to_rgb(hex_color):
     """ Convert a hex color to an RGB tuple with values in the range [0, 1]. """
     hex_color = hex_color.lstrip('#')

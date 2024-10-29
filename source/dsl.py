@@ -103,3 +103,23 @@ def majority(objs: list[ARC_Object]) -> ARC_Object:
     majority, _ = mode(stacked, axis=0)
     image = majority.squeeze()
     return ARC_Object(image, np.ones_like(image))
+
+def copy_translate(obj: ARC_Object, new_pos: (int, int)) -> ARC_Object:
+    new_obj = deepcopy(obj)
+    new_obj.top_left = new_pos
+    return new_obj
+
+
+def tile(obj, direction, count):
+dsl_operations = [
+    color,
+    recolor,
+    rotate, 
+    flip, or_obj,
+    and_obj,
+    most_common,
+    crop,
+    remove_loose,
+    majority,
+    copy_translate
+]
