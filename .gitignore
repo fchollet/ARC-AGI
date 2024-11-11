@@ -1,6 +1,7 @@
 *.svg
 *.png
 .ipynb_checkpoints/
+.virtual_documents/
 __pycache__/
 *.egg-info/
 # python environments
