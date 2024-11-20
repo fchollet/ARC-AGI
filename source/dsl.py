@@ -25,9 +25,15 @@ def rotate(obj: ARC_Object) -> ARC_Object:
     new_obj.height, new_obj.width = new_obj.grid.shape
     return new_obj
 
-def flip(obj: ARC_Object, axis: int) -> ARC_Object:
+# flips left to right, if we need up/down, then rotate first
+def flip(obj: ARC_Object) -> ARC_Object:
     new_obj = deepcopy(obj)
-    new_obj.grid = np.flip(new_obj.grid, axis=axis)
+    new_obj.grid = np.fliplr(new_obj.grid)
+    return new_obj
+
+def transpose(obj: ARC_Object) -> ARC_Object:
+    new_obj = deepcopy(obj)
+    new_obj.grid = new_obj.grid.T
     return new_obj
 
 # top_left and size are (width, height) 
@@ -148,11 +154,9 @@ dsl_operations = [
     rotate, 
     flip, or_obj,
     and_obj,
-    most_common,
     crop,
     remove_loose,
     majority,
-    find,
     tile,
     draw,
     draw_line,

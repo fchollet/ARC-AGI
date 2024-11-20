@@ -1,9 +1,6 @@
 import numpy as np
-from copy import deepcopy
-from scipy.stats import mode
 from typing import List, Tuple
 from objects import ARC_Object
-from segmentation import cbfs
 
 
 # filter objects (List -> smaller List or single object)
@@ -59,7 +56,60 @@ def count_objects(objects: List[ARC_Object]) -> int:
     """
     return len(objects)
 
+def count_mask(mask: np.ndarray) -> int:
+    """
+    Count the number of pixels in the mask.
+    
+    """
+    return np.sum(mask != 0)
+
 # retrieve useful shape properties of objects
+def detect_symmetry(obj: ARC_Object) -> np.ndarray:
+    matrix = obj.grid
+    rows, cols = matrix.shape
+    
+    # Check for symmetry
+    horizontal_symmetry = np.all(matrix == matrix[::-1])
+    vertical_symmetry = np.all(matrix == matrix[:, ::-1])
+    point_symmetry = np.all(matrix == np.flip(matrix, axis=(0, 1)))
+    main_diagonal_symmetry = np.all(matrix == matrix.T)
+    anti_diagonal_symmetry = np.all(matrix == np.flip(matrix.T, axis=1))
+    
+    if point_symmetry:
+        # Generate mask for point symmetry (upper-left quadrant excluding center row and column if odd)
+        half_rows = rows // 2
+        half_cols = cols // 2
+        mask = np.zeros_like(matrix, dtype=bool)
+        mask[:half_rows, :half_cols] = True
+        return mask
+    
+    elif horizontal_symmetry:
+        # Generate mask for horizontal symmetry (upper half excluding center row if odd)
+        half_rows = rows // 2
+        mask = np.zeros_like(matrix, dtype=bool)
+        mask[:half_rows, :] = True
+        return mask
+    
+    elif vertical_symmetry:
+        # Generate mask for vertical symmetry (left half excluding center column if odd)
+        half_cols = cols // 2
+        mask = np.zeros_like(matrix, dtype=bool)
+        mask[:, :half_cols] = True
+        return mask
+    
+    elif main_diagonal_symmetry:
+        # Generate mask for main diagonal symmetry (upper triangle excluding diagonal)
+        mask = np.triu(np.ones_like(matrix, dtype=bool), k=1)
+        return mask
+
+    elif anti_diagonal_symmetry:
+        # Generate mask for anti-diagonal symmetry (lower triangle flipped along anti-diagonal)
+        mask = np.triu(np.ones_like(matrix, dtype=bool), k=1)[::-1, ::-1]
+        return mask
+    else:
+        # No symmetry detected
+        return np.zeros_like(matrix, dtype=bool)
+    
 def get_shape(obj: ARC_Object) -> np.ndarray:
     """
     Get the shape of the object as a bit mask.
