@@ -1,9 +1,10 @@
 import numpy as np
 from copy import deepcopy
 from scipy.stats import mode
-
+from typing import List, Tuple
 from objects import ARC_Object
-
+from itertools import permutations
+from segmentation import cbfs
 '''
 All DSL operations return a new copy of object
 '''
@@ -29,27 +30,9 @@ def flip(obj: ARC_Object, axis: int) -> ARC_Object:
     new_obj.grid = np.flip(new_obj.grid, axis=axis)
     return new_obj
 
-def or_obj(obj1: ARC_Object, obj2: ARC_Object) -> ARC_Object:
-    # color of obj1 takes precedence in new object
-    mask1 = obj1.grid != 0
-    mask2 = obj2.grid != 0
-    image = np.where(mask1 | mask2, np.where(obj1.grid == 0, obj2.grid, obj1.grid), 0)
-    return ARC_Object(image, np.ones_like(image))
-
-def and_obj(obj1: ARC_Object, obj2: ARC_Object) -> ARC_Object:
-    # color of obj1 takes precedence in new object
-    mask1 = obj1.grid != 0
-    mask2 = obj2.grid != 0
-    image = np.where(mask1 & mask2, obj1.grid, 0)
-    return ARC_Object(image, np.ones_like(image))
-
-def most_common(objs: list[ARC_Object]) -> ARC_Object:
-    unique, count = np.unique([o.grid for o in objs], axis=0, return_counts=True)
-    image = unique[np.argmax(count)]
-    return ARC_Object(image, np.ones_like(image))
-
-def crop(obj: ARC_Object, top_left: (int, int), width: int, height: int) -> ARC_Object:
-    image = obj.grid[top_left[1] : top_left[1] + height, top_left[0] : top_left[0] + width]
+# top_left and size are (width, height) 
+def crop(obj: ARC_Object, top_left: Tuple[int, int], size: Tuple[int, int]) -> ARC_Object:
+    image = obj.grid[top_left[1] : top_left[1] + size[1], top_left[0] : top_left[0] + size[0]]
     return ARC_Object(image, np.ones_like(image))
 
 def remove_loose(obj: ARC_Object) -> ARC_Object:
@@ -75,6 +58,28 @@ def remove_loose(obj: ARC_Object) -> ARC_Object:
             mask[x][y] = False
     image = np.where(mask, obj.grid, 0)
     return ARC_Object(image, np.ones_like(image))
+
+def or_obj(obj1: ARC_Object, obj2: ARC_Object) -> ARC_Object:
+    # color of obj1 takes precedence in new object
+    mask1 = obj1.grid != 0
+    mask2 = obj2.grid != 0
+    image = np.where(mask1 | mask2, np.where(obj1.grid == 0, obj2.grid, obj1.grid), 0)
+    return ARC_Object(image, np.ones_like(image))
+
+def and_obj(obj1: ARC_Object, obj2: ARC_Object) -> ARC_Object:
+    # color of obj1 takes precedence in new object
+    mask1 = obj1.grid != 0
+    mask2 = obj2.grid != 0
+    image = np.where(mask1 & mask2, obj1.grid, 0)
+    return ARC_Object(image, np.ones_like(image))
+
+def xor_obj(obj1: ARC_Object, obj2: ARC_Object) -> ARC_Object:
+    # color of obj1 takes precedence in new object
+    mask1 = obj1.grid != 0
+    mask2 = obj2.grid != 0
+    image = np.where(mask1 ^ mask2, obj1.grid, 0)
+    return ARC_Object(image, np.ones_like(image))
+
 
 def majority(objs: list[ARC_Object]) -> ARC_Object:
     height, h_count = np.unique([o.height for o in objs], axis=0, return_counts=True)
@@ -104,13 +109,39 @@ def majority(objs: list[ARC_Object]) -> ARC_Object:
     image = majority.squeeze()
     return ARC_Object(image, np.ones_like(image))
 
-def copy_translate(obj: ARC_Object, new_pos: (int, int)) -> ARC_Object:
-    new_obj = deepcopy(obj)
-    new_obj.top_left = new_pos
-    return new_obj
+def tile(base: ARC_Object, tile: ARC_Object, direction: Tuple[int, int], end: int) -> ARC_Object:
+    """
+    Tile the object in the given direction end times. If end = 0, tile until the edge of the grid.
+    
+    """
+    cur_pos = tile.top_left
+    for i in range(end):
+        new_pos = (cur_pos[0] + direction[0], cur_pos[1] + direction[1])
+        new_tile = deepcopy(tile)
+        new_tile.top_left = new_pos
+        cur_pos = new_pos
+
+def draw(base: ARC_Object, tile: ARC_Object, position: Tuple[int, int]) -> ARC_Object:
+    """
+    Draw the tile on the base object at the given position.
+    
+    """
+    base.grid[position[0] : position[0] + tile.height, position[1] : position[1] + tile.width] = tile.grid
+
+def draw_line(base: ARC_Object, start: Tuple[int, int], end: Tuple[int, int], color: int) -> ARC_Object:
+    """
+    Draw a line on the base object from start to end with the given color.
+    
+    """
+    if start[0] == end[0]:
+        base.grid[start[0], start[1] : end[1] + 1] = color
+    elif start[1] == end[1]:
+        base.grid[start[0] : end[0] + 1, start[1]] = color
+    elif start[1] - end[1] == start[0] - end[0]:
+        for i in range(end[0] - start[0] + 1):
+            base.grid[start[0] + i, start[1] + i] = color
 
 
-def tile(obj, direction, count):
 dsl_operations = [
     color,
     recolor,
@@ -121,5 +152,8 @@ dsl_operations = [
     crop,
     remove_loose,
     majority,
-    copy_translate
-]
+    find,
+    tile,
+    draw,
+    draw_line,
+]    

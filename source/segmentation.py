@@ -181,16 +181,3 @@ def cbfs(image: np.array, x: int, y: int, target_color: int):
                 frontier.append((nx, ny))
                 visited.add((nx, ny))
     return visited
-
-
-def split_by_color(obj: ARC_Object) -> list[ARC_Object]:
-    """
-    Split an object into sub-objects based on color.
-
-    Args:
-        obj (ARC_Object): The input object to split.
-
-    Returns:
-        list[ARC_Object]: A list of sub-objects.
-    """
-    return extract_objects(obj, method='color')

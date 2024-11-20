@@ -136,3 +136,25 @@ def visualize_problem(puzzle_id: str):
             draw.rectangle([x, y, x + cell_size, y + cell_size], fill=COLOR_TO_HEX[color], outline=COLOR_TO_HEX[BORDER])
     
     return img
+
+def visualize_set(objects):
+    max_height = max([obj.grid.shape[0] for obj  in objects])
+    max_width = max([obj.grid.shape[1] for obj  in objects])
+    # number of objects to render in each row
+    closest_square = int(np.ceil(np.sqrt(len(objects))))
+    
+    combined_height = (len(objects) // closest_square) * (max_height+1)+1
+    combined_width = closest_square * (max_width+1)+1
+    
+    combined_grid = np.zeros((combined_height, combined_width), dtype=int)
+    current_y = 0
+    current_x = 0
+    for obj in objects:
+        combined_grid[current_y:current_y + obj.grid.shape[0], current_x:current_x + obj.grid.shape[1]] = obj.grid
+        current_x += max_width
+        # draw a vertical line seperating the objects
+        combined_grid[current_y:current_y + max_height, current_x+max_width] = BORDER
+        current_x += 1
+        if current_x >= combined_width:
+            current_x = 0
+            current_y += max_height+1
