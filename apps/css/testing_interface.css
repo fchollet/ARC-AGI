@@ -167,3 +167,56 @@ input, button {
 #modal input {
     margin-left: 70px;
 }
+
+#task_id_selector, #task_id_selector_main {
+    margin: 10px 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+}
+
+#task_id_input, #task_id_input_main {
+    width: 100px;
+    padding: 2px 5px;
+    margin: 0 5px;
+}
+
+#load_task_id_btn, #load_task_id_btn_main {
+    padding: 2px 10px;
+    margin: 0 5px;
+}
+
+#error_display {
+    color: red;
+    margin-top: 10px;
+    display: none;
+}
+
+#modal #task_id_selector {
+    margin-top: 20px;
+    display: inline-flex;
+    justify-content: center;
+}
+
+#modal #modal_task_id_input {
+    width: 100px;
+    padding: 2px 5px;
+    margin: 0 5px;
+}
+
+#modal #modal_load_task_id_btn {
+    margin: 0;
+    padding: 2px 10px;
+}
+
+.task_type_select {
+    padding: 2px 5px;
+    margin: 0 5px;
+    width: auto;
+    min-width: 120px;
+}
+
+#modal .task_type_select {
+    margin: 0 5px;
+}
