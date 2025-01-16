@@ -270,6 +270,46 @@ function initializeSelectable() {
     }
 }
 
+function loadTaskById(inputElementId = 'task_id_input') {
+    const taskId = document.getElementById(inputElementId).value.trim();
+    if (!taskId) {
+        errorMsg("Please enter a task ID");
+        return;
+    }
+
+    const selectId = inputElementId === 'task_id_input' ? 'task_type_select' : 'task_type_select_main';
+    const taskType = document.getElementById(selectId).value;
+    const taskTypeDisplay = taskType === 'evaluation' ? 'evaluation set' : 'training set';
+
+    $.getJSON(`https://api.github.com/repos/fchollet/ARC/contents/data/${taskType}/${taskId}.json`, function(data) {
+        try {
+            const decodedContent = atob(data.content);
+            const json = JSON.parse(decodedContent);
+            train = json.train;
+            test = json.test;
+        } catch (e) {
+            errorMsg('Bad file format');
+            return;
+        }
+        loadJSONTask(train, test);
+        $('#modal_bg').hide();
+        infoMsg(`Loaded task from ${taskTypeDisplay}: ${taskId}`);
+        display_task_name(`${taskId} (${taskTypeDisplay})`, null, null);
+    })
+    .error(function(){
+        errorMsg('Error loading task');
+    });
+}
+
+function displayError(message) {
+    const errorDisplay = document.getElementById('error_display');
+    errorDisplay.textContent = message;
+    errorDisplay.style.display = 'block';
+    setTimeout(() => {
+        errorDisplay.style.display = 'none';
+    }, 3000);
+}
+
 // Initial event binding.
 
 $(document).ready(function () {

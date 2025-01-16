@@ -22,6 +22,16 @@
                 <br />
                 <input type="file" class="load_task"/>
                 <button onclick="randomTask()" id="random_task_btn">Random task</button>
+
+                <div id="task_id_selector">
+                    <label for="task_id_input">Load task by ID: </label>
+                    <input type="text" id="task_id_input" placeholder="e.g. d5c634a2" />
+                    <select id="task_type_select" class="task_type_select">
+                        <option value="evaluation">Evaluation set</option>
+                        <option value="training">Training set</option>
+                    </select>
+                    <button onclick="loadTaskById()" id="load_task_id_btn">Load</button>
+                </div>
             </div>
         </div>
         <div id="workspace">
@@ -48,8 +58,19 @@
                         <input type="file" id="load_task_file_input" class="load_task" style="display: none;"/>
                         <input type="button" value="Browse..." onclick="document.getElementById('load_task_file_input').click();" />
                         <button onclick="randomTask()" id="random_task_btn"> Random... </button>
+
+                        <div id="task_id_selector_main">
+                            <label for="task_id_input_main">Load task by ID: </label>
+                            <input type="text" id="task_id_input_main" placeholder="e.g. d5c634a2" />
+                            <select id="task_type_select_main" class="task_type_select">
+                                <option value="evaluation">Evaluation set</option>
+                                <option value="training">Training set</option>
+                            </select>
+                            <button onclick="loadTaskById('task_id_input_main')" id="load_task_id_btn_main">Load</button>
+                        </div>
+
                         <p>
-                        <label id='task_name' for="random_task_btn"> Task name: </label>
+                        <label id='task_name'> Task name: </label>
                         <p>
                         <label for="show_symbol_numbers">Show symbol numbers: </label>
                         <input type="checkbox" id="show_symbol_numbers" name="show_symbol_numbers"
