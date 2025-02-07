@@ -14,18 +14,22 @@
 
         <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
 
+        <script>
+        selectTask();
+        </script>
     </head>
     <body>
-        <div id="modal_bg">
+        <!-- just uncomment below and comment out the script in the head above to add back the previous title page -->
+        <!-- <div id="modal_bg">
             <div id="modal">
-                <div>Welcome to the ARC testing interface. <br /> Choose a task file to start, or click on "Random task" to load one from the ARC project on GitHub.</div>
+                <div>Welcome to the ARC testing interface. <br /> Choose a task file to start, or click on "Random task" or "First task" to load one from the ARC project on GitHub.</div>
                 <br />
                 <input type="file" class="load_task"/>
                 <button onclick="randomTask()" id="random_task_btn">Random task</button>
+                <button onclick="selectTask()" id="next_task_btn">First task</button>
             </div>
-        </div>
+        </div> -->
         <div id="workspace">
-
             <div id="demonstration_examples_view">
                 <div class="text" id="task_demo_header">Task demonstration</div>
                 <div id="task_preview"></div>
@@ -44,10 +48,21 @@
                 <div id="evaluation_output_editor">
 
                     <div id="load_task_control_btns">
+                        <label> Select Subset: </label>
+                        <select id="subset_select" onchange="loadSubset()">
+                            <option value="training">Train</option>
+                            <option value="evaluation">Eval</option>
+                        </select>
+                        <br>
                         <label for="load_task_file_input">Load task JSON: </label>
                         <input type="file" id="load_task_file_input" class="load_task" style="display: none;"/>
                         <input type="button" value="Browse..." onclick="document.getElementById('load_task_file_input').click();" />
                         <button onclick="randomTask()" id="random_task_btn"> Random... </button>
+                        <button onclick="prevTask()" id="prev_task_btn">Previous task</button>
+                        <button onclick="nextTask()" id="next_task_btn">Next task</button>
+                        <label for="task_index">Task: </label>
+                        <input type="text" id="task_index" name="task index" value="0">
+                        <button onclick="loadTaskFromInput()" id="select_task_button">Load</button>
                         <p>
                         <label id='task_name' for="random_task_btn"> Task name: </label>
                         <p>
