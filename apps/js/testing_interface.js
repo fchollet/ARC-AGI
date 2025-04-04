@@ -55,7 +55,13 @@ function setUpEditionGridListeners(jqGrid) {
         }
         else if (mode == 'edit') {
             // Else: fill just this cell.
-            setCellSymbol(cell, symbol);
+            old_symbol = parseInt(cell.attr('symbol'));
+            if (symbol == old_symbol) {
+                setCellSymbol(cell, 0);
+            }
+            else {
+                setCellSymbol(cell, symbol);
+            }
         }
     });
 }
