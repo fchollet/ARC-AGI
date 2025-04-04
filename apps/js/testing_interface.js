@@ -6,11 +6,28 @@ var TEST_PAIRS = new Array();
 var CURRENT_TEST_PAIR_INDEX = 0;
 var COPY_PASTE_DATA = new Array();
 
+var CURRENT_TASK_INDEX = 0;
+
 // Cosmetic.
 var EDITION_GRID_HEIGHT = 500;
 var EDITION_GRID_WIDTH = 500;
 var MAX_CELL_SIZE = 100;
 
+var SUBSET = "training";
+
+function loadSubset() {
+    var subsetSelect = document.getElementById("subset_select");
+    var value = subsetSelect.value;
+    if (value == "training") {
+        SUBSET = "training";
+    } else if (value == "evaluation") {
+        SUBSET = "evaluation";
+    } else {
+        errorMsg('Invalid subset');
+    }
+
+    selectTask();
+}
 
 function resetTask() {
     CURRENT_INPUT_GRID = new Grid(3, 3);
@@ -77,6 +94,7 @@ function resetOutputGrid() {
     syncFromEditionGridToDataGrid();
     CURRENT_OUTPUT_GRID = new Grid(3, 3);
     syncFromDataGridToEditionGrid();
+    $('#output_grid_size').val('3x3'); // otherwise on page refresh it will still keep the previous size (except if shift+ctrl+r)
     resizeOutputGrid();
 }
 
@@ -173,11 +191,19 @@ function loadTaskFromFile(e) {
     reader.readAsText(file);
 }
 
-function randomTask() {
-    var subset = "training";
-    $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + subset, function(tasks) {
-        var task_index = Math.floor(Math.random() * tasks.length)
+function selectTask() {
+    $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + SUBSET, function(tasks) {
+        if (CURRENT_TASK_INDEX < 0) {
+            CURRENT_TASK_INDEX = tasks.length - 1;
+        }
+        if (CURRENT_TASK_INDEX >= tasks.length) {
+            CURRENT_TASK_INDEX = 0;
+        }
+        var task_index = CURRENT_TASK_INDEX;
         var task = tasks[task_index];
+
+        $('#task_index').val(CURRENT_TASK_INDEX);
+
         $.getJSON(task["download_url"], function(json) {
             try {
                 train = json['train'];
@@ -188,7 +214,8 @@ function randomTask() {
             }
             loadJSONTask(train, test);
             //$('#load_task_file_input')[0].value = "";
-            infoMsg("Loaded task training/" + task["name"]);
+            // infoMsg("Loaded task training/" + task["name"]);
+            infoMsg("Loaded task " + SUBSET + "/" + task["name"]);
             display_task_name(task['name'], task_index, tasks.length);
         })
         .error(function(){
@@ -199,6 +226,36 @@ function randomTask() {
       errorMsg('Error loading task list');
     });
 }
+
+function randomTask() {
+    $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + SUBSET, function(tasks) {
+        var random  = Math.random();
+        CURRENT_TASK_INDEX = Math.floor(Math.random() * tasks.length);
+
+        selectTask();
+    }).error(function(){
+        errorMsg('Error loading task list');
+    });
+}
+
+function nextTask() {
+    CURRENT_TASK_INDEX += 1;
+
+    selectTask();
+}
+
+function prevTask() {
+    CURRENT_TASK_INDEX -= 1;
+
+    selectTask();
+}
+
+function loadTaskFromInput() {
+    CURRENT_TASK_INDEX = $('#task_index').val();
+
+    selectTask();
+}
+
 
 function nextTestInput() {
     if (TEST_PAIRS.length <= CURRENT_TEST_PAIR_INDEX + 1) {
