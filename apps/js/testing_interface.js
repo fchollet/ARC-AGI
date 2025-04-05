@@ -11,6 +11,8 @@ var EDITION_GRID_HEIGHT = 500;
 var EDITION_GRID_WIDTH = 500;
 var MAX_CELL_SIZE = 100;
 
+var task_index = -1
+var training_tasks;
 
 function resetTask() {
     CURRENT_INPUT_GRID = new Grid(3, 3);
@@ -173,31 +175,63 @@ function loadTaskFromFile(e) {
     reader.readAsText(file);
 }
 
-function randomTask() {
-    var subset = "training";
-    $.getJSON("https://api.github.com/repos/fchollet/ARC/contents/data/" + subset, function(tasks) {
-        var task_index = Math.floor(Math.random() * tasks.length)
-        var task = tasks[task_index];
-        $.getJSON(task["download_url"], function(json) {
-            try {
-                train = json['train'];
-                test = json['test'];
-            } catch (e) {
-                errorMsg('Bad file format');
-                return;
-            }
-            loadJSONTask(train, test);
-            //$('#load_task_file_input')[0].value = "";
-            infoMsg("Loaded task training/" + task["name"]);
-            display_task_name(task['name'], task_index, tasks.length);
-        })
-        .error(function(){
-          errorMsg('Error loading task');
+async function load_training_tasks()
+{
+    const subset = "training";
+    const apiUrl = `https://api.github.com/repos/fchollet/ARC/contents/data/${subset}`;
+
+    try {
+        const response = await $.ajax({
+            url: apiUrl,
+            dataType: 'json'
         });
+
+        training_tasks = response;
+    } catch (error) {
+        errorMsg('Error loading task list');
+        throw error;
+    }
+}
+
+function loadTask(index) {
+    const downloadUrlTemplate = "https://api.github.com/repos/fchollet/ARC/contents/data/%s";
+
+    task_index = index === null ? Math.floor(Math.random() * training_tasks.length) : index;
+    const task = training_tasks[task_index];
+    
+    $.getJSON(task["download_url"], function(json) {
+        try {
+            train = json['train'];
+            test = json['test'];
+        } catch (e) {
+            errorMsg('Bad file format');
+            return;
+        }
+        loadJSONTask(train, test);
+        
+        infoMsg(`Loaded task ${task.name}`);
+        display_task_name(task.name, task_index, training_tasks.length);
     })
     .error(function(){
-      errorMsg('Error loading task list');
+        errorMsg('Error loading task');
     });
+}
+
+function randomTask() {
+    loadTask(null);
+}
+
+function loadTaskByIndex() {
+    const taskIndex = document.getElementById('task_index_input').value;
+    loadTask(parseInt(taskIndex));
+}
+
+function previousTask() {
+    loadTask((task_index - 1 + training_tasks.length) % training_tasks.length);
+}
+
+function nextTask() {
+    loadTask((task_index + 1) % training_tasks.length);
 }
 
 function nextTestInput() {
@@ -272,7 +306,8 @@ function initializeSelectable() {
 
 // Initial event binding.
 
-$(document).ready(function () {
+$(function () {
+
     $('#symbol_picker').find('.symbol_preview').click(function(event) {
         symbol_preview = $(event.target);
         $('#symbol_picker').find('.symbol_preview').each(function(i, preview) {
@@ -378,4 +413,6 @@ $(document).ready(function () {
             }
         }
     });
+
+    load_training_tasks()
 });
